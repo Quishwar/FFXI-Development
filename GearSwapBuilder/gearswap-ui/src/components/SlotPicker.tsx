@@ -1,5 +1,5 @@
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
-import { Command, CommandInput, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
+import { Command, CommandInput, CommandEmpty, CommandGroup, CommandItem, CommandList } from "@/components/ui/command";
 import { useGearStore } from "@/store/useGearStore";
 import { SLOT_ITEMS } from "@/data/items";
 
@@ -22,24 +22,31 @@ export function SlotPicker({ slot, setName }: { slot: string; setName: string })
           </div>
         </div>
       </PopoverTrigger>
-      <PopoverContent className="w-[220px] p-0 bg-black border-zinc-800 select-none">
+      
+      <PopoverContent className="w-[220px] p-0 bg-black border-zinc-800 shadow-2xl" align="start">
         <Command className="bg-transparent">
-          <CommandInput placeholder={`Search ${slot}...`} className="h-9 text-xs" />
-          <CommandEmpty>No items found.</CommandEmpty>
-          <CommandGroup className="max-h-64 overflow-y-auto">
-            <CommandItem onSelect={() => updateSlot(setName, slot, "")} className="text-zinc-500 italic">
-              Clear Slot
-            </CommandItem>
-            {items.map((item) => (
-              <CommandItem
-                key={item}
-                onSelect={() => updateSlot(setName, slot, item)}
-                className="text-zinc-200 aria-selected:bg-blue-600 aria-selected:text-white transition-colors"
+          {/* SEARCH BAR INSIDE DROPDOWN */}
+          <CommandInput placeholder={`Search ${slot}...`} className="h-9 text-xs border-none focus:ring-0" />
+          <CommandList className="max-h-64 scrollbar-thin">
+            <CommandEmpty className="py-2 text-center text-xs text-zinc-500">No items found.</CommandEmpty>
+            <CommandGroup>
+              <CommandItem 
+                onSelect={() => updateSlot(setName, slot, "")} 
+                className="text-zinc-500 italic text-xs cursor-pointer hover:bg-zinc-900"
               >
-                {item}
+                Clear Slot
               </CommandItem>
-            ))}
-          </CommandGroup>
+              {items.map((item) => (
+                <CommandItem
+                  key={item}
+                  onSelect={() => updateSlot(setName, slot, item)}
+                  className="text-zinc-200 text-xs aria-selected:bg-blue-600 aria-selected:text-white transition-colors cursor-pointer"
+                >
+                  {item}
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
         </Command>
       </PopoverContent>
     </Popover>
