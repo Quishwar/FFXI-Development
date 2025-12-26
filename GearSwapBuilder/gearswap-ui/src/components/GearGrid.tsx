@@ -2,13 +2,13 @@ import { useState } from "react";
 import { useGearStore } from "@/store/useGearStore";
 import { SlotPicker } from "./SlotPicker";
 import { Button } from "@/components/ui/button";
-import { Trash2, Eraser } from "lucide-react"; 
+import { Trash2, Eraser } from "lucide-react";
 import { AddVariantDialog } from "./AddVariantDialog";
 import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
 
 export function GearGrid() {
   const { allSets, activeTab, removeSet, clearSet } = useGearStore();
-  
+
   // Only need state for the Delete dialog now
   const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
 
@@ -43,13 +43,15 @@ export function GearGrid() {
               <div className="h-[1px] flex-1 bg-operator/10" />
 
               <div className="flex items-center gap-1 opacity-0 group-hover/section:opacity-100 transition-all">
-                
+
                 {/* One-click Clear Gear Set */}
                 <Button
                   variant="ghost"
                   size="icon"
-                  onClick={() => clearSet(setName)} // Direct call, no dialog
-                  className="w-8 h-8 text-operator hover:text-brand hover:bg-brand/10 transition-colors"
+                  onClick={() => clearSet(setName)}
+                  /* Removed 'ff-interactive' to lose the FFXI finger */
+                  /* Added 'cursor-pointer' for the standard hand icon */
+                  className="w-8 h-8 cursor-pointer text-operator hover:text-brand hover:bg-brand/10 transition-colors"
                   title="Clear all slots"
                 >
                   <Eraser className="w-4 h-4" />
@@ -60,8 +62,10 @@ export function GearGrid() {
                   <Button
                     variant="ghost"
                     size="icon"
-                    onClick={() => setDeleteTarget(setName)} 
-                    className="w-8 h-8 text-operator hover:text-red-500 hover:bg-red-500/10 transition-colors"
+                    onClick={() => setDeleteTarget(setName)}
+                    /* Removed 'ff-interactive' to lose the FFXI finger */
+                    /* Added 'cursor-pointer' for the standard hand icon */
+                    className="w-8 h-8 cursor-pointer text-operator hover:text-red-500 hover:bg-red-500/10 transition-colors"
                     title="Delete variant"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -83,7 +87,7 @@ export function GearGrid() {
         <AddVariantDialog />
       </div>
 
-      <DeleteConfirmDialog 
+      <DeleteConfirmDialog
         open={!!deleteTarget}
         onOpenChange={(open) => !open && setDeleteTarget(null)}
         onConfirm={() => {

@@ -48,7 +48,6 @@
 /* --- 3. GLOBAL UI COMPONENTS --- */
 
 .app-title {
-  /* This forces the title to use #3b82f6 in Dark and #ffcc00 in FFXI */
   color: var(--brand-color) !important;
   font-weight: 900;
   letter-spacing: -0.05em;
@@ -56,19 +55,15 @@
   transition: all 0.30s ease;
 }
 
-/* Specific FFXI "Logo" styling */
 [data-theme='ffxi'] .app-title {
-  /* The classic 3D offset look */
   text-shadow: 2px 2px 0px #000, -1px -1px 0px #000;
-  letter-spacing: 0.05em; /* FFXI titles are usually a bit wider */
+  letter-spacing: 0.05em;
 }
-
 
 .ff-window {
   background: var(--window-bg);
   border: 1px solid rgba(255, 255, 255, 0.1);
   @apply rounded-xl transition-all relative;
-  /* Blur Fix: Prevents sub-pixel jitter */
   backface-visibility: hidden;
   transform: translateZ(0);
 }
@@ -77,20 +72,48 @@
   border: 1px solid #000 !important;
   box-shadow: inset 1px 1px 0px #fff, inset -1px -1px 0px #000 !important;
   border-radius: 0px !important;
-  /* Sharpness Fix: Increases contrast for small text */
   image-rendering: -webkit-optimize-contrast;
 }
 
 [data-theme='dark'] .ff-window:hover {
-  border-color: rgba(255, 255, 255, 0.6) !important;
-  box-shadow: 0 0 12px rgba(255, 255, 255, 0.05);
+  border-color: rgba(59, 130, 246, 0.5) !important;
+  box-shadow: 0 0 12px rgba(59, 130, 246, 0.1);
   background-color: #27272a !important; 
+}
+
+/* Target only slot-specific text for Blue Hover in Dark Mode */
+[data-theme='dark'] .ff-window:hover span.text-operator\/60,
+[data-theme='dark'] .ff-window:hover .text-operator\/30,
+[data-theme='dark'] .ff-window:hover .text-white {
+  color: var(--brand-color) !important;
+  transition: color 0.2s ease;
+}
+
+/* Ensure Clear Slot text stays white/muted */
+[cmdk-item] span.opacity-70 {
+  color: #ffffff !important;
+  opacity: 0.7 !important;
+}
+
+/* --- EQUIPPED INNER GLOW FIX --- */
+[data-theme='ffxi'] .ff-window.border-brand {
+  box-shadow: 
+    inset 1px 1px 0px #fff, 
+    inset -1px -1px 0px #000,
+    inset 0 0 20px rgba(234, 179, 8, 0.45) !important;
+  background-color: #0000aa !important; 
+  filter: brightness(1.1);
+  transform: translateY(-1px) translateZ(0);
+}
+
+[data-theme='dark'] .ff-window.border-brand {
+  box-shadow: inset 0 0 15px rgba(59, 130, 246, 0.2) !important;
+  background-color: rgba(59, 130, 246, 0.15) !important;
 }
 
 /* --- 4. INTERACTION & FINGERS --- */
 
 .ff-interactive {
-  /* Prevent blur: keeps element on GPU layer */
   transform-style: preserve-3d;
   perspective: 1000px;
   transform: translateZ(0);
@@ -102,7 +125,6 @@
   position: absolute;
   left: -28px;
   top: 50%;
-  /* Layering Fix: translateZ(10px) pulls finger above scaled border */
   transform: translateY(-50%) translateZ(10px);
   font-size: 16px;
   display: block !important;
@@ -116,11 +138,9 @@
 }
 
 [data-theme='ffxi'] .ff-interactive:hover {
-  /* Sharpness Fix: translate3d is crisper than translateX */
   transform: translate3d(6px, 0, 0);
 }
 
-/* Modern Hover for Dark Mode (No finger) */
 [data-theme='dark'] .ff-interactive:hover {
   filter: brightness(1.2);
 }
@@ -139,7 +159,6 @@
   border-radius: 2px !important;
 }
 
-/* Layout clipping fixes */
 main, .group\/section, #root, .ff-grid-container, [role="grid"], .max-w-4xl {
   overflow: visible !important;
 }
@@ -182,14 +201,21 @@ main, .group\/section, #root, .ff-grid-container, [role="grid"], .max-w-4xl {
   content: "👉" !important;
 }
 
-/* --- 6. FFXI COMMAND/SEARCH OVERRIDES --- */
+/* --- 6. COMMAND/SEARCH OVERRIDES --- */
+
+/* Force search icon to white in both themes */
+[cmdk-input-wrapper] svg, 
+.lucide-search {
+  color: #ffffff !important;
+  stroke: #ffffff !important;
+  opacity: 0.6 !important;
+}
 
 [data-theme='ffxi'] [cmdk-input],
 [data-theme='ffxi'] [cmdk-item],
 [data-theme='ffxi'] [cmdk-group-heading],
 [data-theme='ffxi'] [cmdk-empty] {
   color: #ffffff !important;
-  /* Sharpness Fix: disables modern font smoothing for retro look */
   -webkit-font-smoothing: none;
   text-rendering: optimizeLegibility;
 }
@@ -198,10 +224,6 @@ main, .group\/section, #root, .ff-grid-container, [role="grid"], .max-w-4xl {
   background-color: var(--brand-color) !important;
   color: #000000 !important;
   text-shadow: none !important;
-}
-
-[data-theme='ffxi'] [cmdk-input-wrapper] svg {
-  color: #ffffff !important;
 }
 
 [data-theme='ffxi'] [cmdk-input]::placeholder {

@@ -11,13 +11,13 @@ export function SlotPicker({ slot, setName }: { slot: string; setName: string })
   const isEquipped = !!selected;
 
   const allItemsForSlot = useMemo(() => {
-    return searchableItems[slot] || searchableItems[slot.toLowerCase()] || [];
+    return searchableItems[slot] || [];
   }, [searchableItems, slot]);
 
   const filteredItems = useMemo(() => {
     const query = search.toLowerCase();
     return allItemsForSlot
-      .filter(item => !search || item.toLowerCase().includes(query))
+      .filter((item: string) => !search || item.toLowerCase().includes(query))
       .slice(0, 100);
   }, [search, allItemsForSlot]);
 
@@ -25,16 +25,12 @@ export function SlotPicker({ slot, setName }: { slot: string; setName: string })
     <div className="w-full h-full">
       <Popover>
         <PopoverTrigger asChild>
-          {/* REMOVED 'relative' and 'z-index' here. 
-              The .ff-window and .ff-interactive from your CSS handle the positioning 
-          */}
           <div className={`
             ff-window ff-interactive flex flex-col p-3 min-h-[85px] h-full cursor-pointer transition-all duration-300
-            ${isEquipped 
-              ? "border-brand bg-brand/10" 
-              : "border-white/5 bg-black/40"}
+            ${isEquipped ? "border-brand bg-brand/10 border-brand" : "border-white/5 bg-black/40"}
           `}>
-            <span className="text-[10px] font-black uppercase tracking-widest text-operator/60 transition-colors">
+            {/* Added 'text-operator/60' back specifically for the CSS selector */}
+            <span className="text-[10px] font-black uppercase tracking-widest text-operator/60">
               {slot}
             </span>
 
@@ -44,35 +40,33 @@ export function SlotPicker({ slot, setName }: { slot: string; setName: string })
               </div>
             </div>
 
-            {/* Restored the simple gold accent bar for equipped items */}
             {isEquipped && <div className="absolute inset-y-0 left-0 w-1 bg-brand" />}
           </div>
         </PopoverTrigger>
 
-        {/* Z-INDEX HERE IS OK: This is for the dropdown menu only 
-        */}
         <PopoverContent className="w-[240px] p-0 ff-window border-none shadow-2xl z-50" align="start" sideOffset={8}>
-          <Command shouldFilter={false} className="bg-transparent">
+          {/* Forces search icon to white without affecting children blue hover logic */}
+          <Command shouldFilter={false} className="bg-transparent text-white">
             <CommandInput 
               placeholder={`Search ${slot}...`} 
               value={search} 
               onValueChange={setSearch}
-              className="h-9 text-xs border-none focus:ring-0" 
+              className="h-9 text-xs border-none focus:ring-0 text-white" 
             />
             <CommandList className="max-h-64 custom-scrollbar overflow-y-auto">
               <CommandEmpty className="p-4 text-xs text-center text-white/50">No items found.</CommandEmpty>
               <CommandGroup>
                 <CommandItem 
                   onSelect={() => { updateSlot(setName, slot, ""); setSearch(""); }}
-                  className="text-xs py-2 px-3 cursor-pointer"
+                  className="ff-interactive relative text-xs py-2 px-8 cursor-pointer border-b border-white/5 mb-1"
                 >
-                  [ Clear Slot ]
+                  <span className="opacity-70">[ Clear Slot ]</span>
                 </CommandItem>
-                {filteredItems.map((item) => (
+                {filteredItems.map((item: string) => (
                   <CommandItem 
                     key={item} 
                     onSelect={() => { updateSlot(setName, slot, item); setSearch(""); }}
-                    className="text-xs py-2 px-3 cursor-pointer"
+                    className="ff-interactive relative text-xs py-2 px-8 cursor-pointer"
                   >
                     {item}
                   </CommandItem>
