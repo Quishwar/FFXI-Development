@@ -1,29 +1,130 @@
 @import "tailwindcss";
 
 @theme {
-  /* Softened Zinc palette */
-  --color-background: #0f0f11;  /* Lifted from near-black to deep charcoal */
-  --color-panel: #18181b;       /* Zinc 900 */
-  --color-border: #27272a;      /* Zinc 800 */
-  --color-ffxi-blue: #3b82f6;
-  
-  --radius-lg: 4px; /* Adding a tiny bit of roundness back for a softer feel */
+  --color-brand: var(--brand-color);
+  --color-operator: var(--operator-color);
+  --color-ui-window: var(--window-bg);
+  --color-lua-orange: #f97316;
+  --color-lua-green: #22c55e;
+  --variant-dark: [data-theme="dark"] &;
 }
 
-.custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--color-border);
-  border-radius: 10px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: var(--color-ffxi-blue);
+/* --- 1. DARK THEME (Default) --- */
+:root, [data-theme='dark'] {
+  --brand-color: #3b82f6;      
+  --operator-color: #a1a1aa;   
+  --window-bg: #18181b;
+  --background: #09090b;
+  --foreground: #fafafa;
+  --active-text: #ffffff;
 }
 
-@layer base {
-  body {
-    @apply bg-background text-zinc-100 antialiased selection:bg-ffxi-blue/30;
-    font-feature-settings: "ss01", "ss03", "cv01";
-  }
+[data-theme='dark'] {
+  background-color: var(--background) !important;
+}
+
+/* Dark Mode UI Fixes */
+[data-theme='dark'] [cmdk-item],
+[data-theme='dark'] [cmdk-input] {
+  color: #ffffff !important;
+}
+
+/* --- 2. FFXI THEME --- */
+[data-theme='ffxi'] {
+  --brand-color: #ffcc00;
+  --operator-color: #ffffff;
+  --window-bg: #000080;
+  --background: #000033;
+  --foreground: #ffffff;
+  --active-text: #000000;
+  background: linear-gradient(180deg, #000080 0%, #000033 100%) fixed !important;
+}
+
+/* --- 3. GLOBAL UI COMPONENTS --- */
+
+.ff-window {
+  background: var(--window-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  @apply rounded-xl transition-all relative;
+}
+
+[data-theme='ffxi'] .ff-window {
+  border: 1px solid #000 !important;
+  box-shadow: inset 1px 1px 0px #fff, inset -1px -1px 0px #000 !important;
+  border-radius: 0px !important;
+}
+
+[data-theme='dark'] .ff-window:hover {
+  /* This changes the border to a bright white/zinc */
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  /* Adds a subtle white inner glow */
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.05);
+  /* Optional: slightly lighten the background of the box */
+  background-color: #27272a !important; 
+}
+
+/* index.css */
+
+.app-title {
+  /* This automatically picks up #3b82f6 (Dark) or #ffcc00 (FFXI) */
+  color: var(--brand-color) !important;
+  @apply transition-all duration-300 font-black tracking-tighter;
+}
+
+/* Optional: Add the classic FFXI "Logo" shadow only in FFXI mode */
+[data-theme='ffxi'] .app-title {
+  text-shadow: 2px 2px 0px #000, -1px -1px 0px #000;
+}
+
+/* --- 4. INTERACTION & FINGERS --- */
+
+.ff-interactive {
+  cursor: pointer !important;
+  position: relative !important;
+  transition: all 0.1s ease-in-out;
+}
+
+/* The Finger - Only shows in FFXI mode */
+[data-theme='ffxi'] .ff-interactive:hover::before {
+  content: "👉" !important;
+  position: absolute;
+  left: -28px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 16px;
+  display: block !important; /* Forces it back on */
+  animation: ff-finger-wiggle 0.4s infinite alternate;
+}
+
+@keyframes ff-finger-wiggle {
+  from { transform: translateY(-50%) translateX(0); }
+  to { transform: translateY(-50%) translateX(-4px); }
+}
+
+[data-theme='ffxi'] .ff-interactive:hover {
+  transform: translateX(6px);
+}
+
+/* Modern Hover for Dark Mode (No finger) */
+[data-theme='dark'] .ff-interactive:hover {
+  filter: brightness(1.2);
+}
+
+/* --- 5. TABS & ACTIVE STATES --- */
+
+[data-state='active'], [aria-selected="true"] {
+  background-color: var(--brand-color) !important;
+  color: var(--active-text) !important;
+  text-shadow: none !important;
+  font-weight: 700;
+}
+
+[data-theme='ffxi'] [data-state='active'] {
+  box-shadow: inset 1px 1px 0px #fff, inset -1px -1px 0px #000 !important;
+  border-radius: 2px !important;
+}
+
+/* Ensure parents don't clip the finger icons */
+main, .group\/section, #root {
+  overflow: visible !important;
 }
