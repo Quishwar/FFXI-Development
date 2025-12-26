@@ -1,187 +1,214 @@
+@import "tailwindcss";
 
-@import "tw-animate-css";
+@theme {
+  --color-brand: var(--brand-color);
+  --color-operator: var(--operator-color);
+  --color-ui-window: var(--window-bg);
+  --color-lua-orange: #f97316;
+  --color-lua-green: #22c55e;
+  --variant-dark: [data-theme="dark"] &;
+}
 
-@custom-variant dark (&:is(.dark *));
+/* --- 1. DARK THEME (Default) --- */
+:root, [data-theme='dark'] {
+  --brand-color: #3b82f6;      
+  --operator-color: #a1a1aa;   
+  --window-bg: #18181b;
+  --background: #09090b;
+  --foreground: #fafafa;
+  --active-text: #ffffff;
+}
 
-@tailwind base;
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+  --brand: #eab308;
+  --brand-rgb: 234, 179, 8;
+}
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+[data-theme='dark'] {
+  background-color: var(--background) !important;
+}
 
-  font-synthesis: none;
+/* Dark Mode UI Fixes */
+[data-theme='dark'] [cmdk-item],
+[data-theme='dark'] [cmdk-input] {
+  color: #ffffff !important;
+}
+
+/* --- 2. FFXI THEME --- */
+[data-theme='ffxi'] {
+  --brand-color: #ffcc00;
+  --operator-color: #ffffff;
+  --window-bg: #000080;
+  --background: #000033;
+  --foreground: #ffffff;
+  --active-text: #000000;
+  background: linear-gradient(180deg, #000080 0%, #000033 100%) fixed !important;
+}
+
+/* --- 3. GLOBAL UI COMPONENTS --- */
+
+.app-title {
+  /* This forces the title to use #3b82f6 in Dark and #ffcc00 in FFXI */
+  color: var(--brand-color) !important;
+  font-weight: 900;
+  letter-spacing: -0.05em;
+  text-transform: uppercase;
+  transition: all 0.30s ease;
+}
+
+/* Specific FFXI "Logo" styling */
+[data-theme='ffxi'] .app-title {
+  /* The classic 3D offset look */
+  text-shadow: 2px 2px 0px #000, -1px -1px 0px #000;
+  letter-spacing: 0.05em; /* FFXI titles are usually a bit wider */
+}
+
+
+.ff-window {
+  background: var(--window-bg);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  @apply rounded-xl transition-all relative;
+  /* Blur Fix: Prevents sub-pixel jitter */
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+[data-theme='ffxi'] .ff-window {
+  border: 1px solid #000 !important;
+  box-shadow: inset 1px 1px 0px #fff, inset -1px -1px 0px #000 !important;
+  border-radius: 0px !important;
+  /* Sharpness Fix: Increases contrast for small text */
+  image-rendering: -webkit-optimize-contrast;
+}
+
+[data-theme='dark'] .ff-window:hover {
+  border-color: rgba(255, 255, 255, 0.6) !important;
+  box-shadow: 0 0 12px rgba(255, 255, 255, 0.05);
+  background-color: #27272a !important; 
+}
+
+/* --- 4. INTERACTION & FINGERS --- */
+
+.ff-interactive {
+  /* Prevent blur: keeps element on GPU layer */
+  transform-style: preserve-3d;
+  perspective: 1000px;
+  transform: translateZ(0);
+  transition: transform 0.1s ease-in-out;
+}
+
+[data-theme='ffxi'] .ff-interactive:hover::before {
+  content: "👉" !important;
+  position: absolute;
+  left: -28px;
+  top: 50%;
+  /* Layering Fix: translateZ(10px) pulls finger above scaled border */
+  transform: translateY(-50%) translateZ(10px);
+  font-size: 16px;
+  display: block !important;
+  animation: ff-finger-wiggle 0.4s infinite alternate;
+  z-index: 100 !important;
+}
+
+@keyframes ff-finger-wiggle {
+  from { transform: translateY(-50%) translate3d(0, 0, 10px); }
+  to { transform: translateY(-50%) translate3d(-4px, 0, 10px); }
+}
+
+[data-theme='ffxi'] .ff-interactive:hover {
+  /* Sharpness Fix: translate3d is crisper than translateX */
+  transform: translate3d(6px, 0, 0);
+}
+
+/* Modern Hover for Dark Mode (No finger) */
+[data-theme='dark'] .ff-interactive:hover {
+  filter: brightness(1.2);
+}
+
+/* --- 5. TABS & ACTIVE STATES --- */
+
+[data-state='active'], [aria-selected="true"] {
+  background-color: var(--brand-color) !important;
+  color: var(--active-text) !important;
+  text-shadow: none !important;
+  font-weight: 700;
+}
+
+[data-theme='ffxi'] [data-state='active'] {
+  box-shadow: inset 1px 1px 0px #fff, inset -1px -1px 0px #000 !important;
+  border-radius: 2px !important;
+}
+
+/* Layout clipping fixes */
+main, .group\/section, #root, .ff-grid-container, [role="grid"], .max-w-4xl {
+  overflow: visible !important;
+}
+
+/* Dialog Specifics */
+[data-theme='ffxi'] [role='dialog'] {
+  border: 1px solid #000 !important;
+  box-shadow: inset 1px 1px 0px #fff, inset -1px -1px 0px #000, 8px 8px 0px rgba(0,0,0,0.5) !important;
+  border-radius: 0px !important;
+  overflow: visible !important;
+}
+
+[data-theme='ffxi'] [role='dialog'] input {
+  background-color: #000044 !important;
+  border: 1px solid #fff !important;
+  border-radius: 0px !important;
+  color: white !important;
+}
+
+[data-theme='ffxi'] [role='dialog'] button[type='submit'] {
+  border: 1px solid #fff;
+}
+
+.dialog-submit-btn {
+  @apply transition-all duration-200;
+}
+
+[data-theme='ffxi'] .dialog-submit-btn {
+  border-radius: 0px !important;
+  box-shadow: inset 1px 1px 0px #fff, inset -1px -1px 0px #000 !important;
+  border: 1px solid #000 !important;
+}
+
+[data-theme='dark'] .dialog-submit-btn {
+  border-radius: 8px !important; 
+}
+
+[data-theme='ffxi'] [role='dialog'] .ff-interactive:hover::before {
+  left: -32px;
+  content: "👉" !important;
+}
+
+/* --- 6. FFXI COMMAND/SEARCH OVERRIDES --- */
+
+[data-theme='ffxi'] [cmdk-input],
+[data-theme='ffxi'] [cmdk-item],
+[data-theme='ffxi'] [cmdk-group-heading],
+[data-theme='ffxi'] [cmdk-empty] {
+  color: #ffffff !important;
+  /* Sharpness Fix: disables modern font smoothing for retro look */
+  -webkit-font-smoothing: none;
   text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.129 0.042 264.695);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.129 0.042 264.695);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.129 0.042 264.695);
-  --primary: oklch(0.208 0.042 265.755);
-  --primary-foreground: oklch(0.984 0.003 247.858);
-  --secondary: oklch(0.968 0.007 247.896);
-  --secondary-foreground: oklch(0.208 0.042 265.755);
-  --muted: oklch(0.968 0.007 247.896);
-  --muted-foreground: oklch(0.554 0.046 257.417);
-  --accent: oklch(0.968 0.007 247.896);
-  --accent-foreground: oklch(0.208 0.042 265.755);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.929 0.013 255.508);
-  --input: oklch(0.929 0.013 255.508);
-  --ring: oklch(0.704 0.04 256.788);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --sidebar: oklch(0.984 0.003 247.858);
-  --sidebar-foreground: oklch(0.129 0.042 264.695);
-  --sidebar-primary: oklch(0.208 0.042 265.755);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.968 0.007 247.896);
-  --sidebar-accent-foreground: oklch(0.208 0.042 265.755);
-  --sidebar-border: oklch(0.929 0.013 255.508);
-  --sidebar-ring: oklch(0.704 0.04 256.788);
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+[data-theme='ffxi'] [cmdk-item][aria-selected="true"] {
+  background-color: var(--brand-color) !important;
+  color: #000000 !important;
+  text-shadow: none !important;
 }
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+[data-theme='ffxi'] [cmdk-input-wrapper] svg {
+  color: #ffffff !important;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+[data-theme='ffxi'] [cmdk-input]::placeholder {
+  color: rgba(255, 255, 255, 0.4) !important;
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
-}
-
-@theme inline {
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
-}
-
-.dark {
-  --background: oklch(0.129 0.042 264.695);
-  --foreground: oklch(0.984 0.003 247.858);
-  --card: oklch(0.208 0.042 265.755);
-  --card-foreground: oklch(0.984 0.003 247.858);
-  --popover: oklch(0.208 0.042 265.755);
-  --popover-foreground: oklch(0.984 0.003 247.858);
-  --primary: oklch(0.929 0.013 255.508);
-  --primary-foreground: oklch(0.208 0.042 265.755);
-  --secondary: oklch(0.279 0.041 260.031);
-  --secondary-foreground: oklch(0.984 0.003 247.858);
-  --muted: oklch(0.279 0.041 260.031);
-  --muted-foreground: oklch(0.704 0.04 256.788);
-  --accent: oklch(0.279 0.041 260.031);
-  --accent-foreground: oklch(0.984 0.003 247.858);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: oklch(0.551 0.027 264.364);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.208 0.042 265.755);
-  --sidebar-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-accent: oklch(0.279 0.041 260.031);
-  --sidebar-accent-foreground: oklch(0.984 0.003 247.858);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.551 0.027 264.364);
-}
-
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
-  body {
-    @apply bg-background text-foreground;
-  }
+[data-theme='ffxi'] [cmdk-root],
+[data-theme='ffxi'] [role='listbox'] {
+  background-color: var(--window-bg) !important;
 }

@@ -1,35 +1,42 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useEffect } from "react";
+import { TopNav } from "./components/TopNav";
+import { GearGrid } from "./components/GearGrid";
+import { LuaPreview } from "./components/LuaPreview";
+import { useGearStore } from "./store/useGearStore";
 
-function App() {
-  const [count, setCount] = useState(0)
+import ITEM_DATA from "@/data/items.json";
+
+export default function App() {
+  const theme = useGearStore((state) => state.theme);
+  const initializeItems = useGearStore(s => s.initializeItems);
+
+  useEffect(() => {
+    initializeItems(ITEM_DATA);
+  }, []);
+
+  // Sync the Zustand theme state with the HTML data-attribute
+  useEffect(() => {
+    document.documentElement.setAttribute("data-theme", theme);
+  }, [theme]);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.tsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    /* Using bg-background and text-foreground ensures 
+       the theme switch actually changes the visual colors.
+    */
+    <div className="flex flex-col h-screen w-full bg-background text-zinc-200 transition-colors duration-300">
+      <TopNav />
 
-export default App
+      <div className="flex flex-1 overflow-hidden">
+        <main className="flex-1 overflow-y-auto custom-scrollbar">
+          <div className="max-w-4xl mx-auto px-8">
+            <GearGrid />
+          </div>
+        </main>
+
+        <aside className="ff-window no-hand w-[420px] border-l border-border flex flex-col overflow-hidden">
+          <LuaPreview />
+        </aside>
+      </div>
+    </div>
+  );
+}
