@@ -25,20 +25,62 @@ export const parseLuaToSets = (luaText: string): ParseResult => {
   const logs: ImportLog[] = [];
   
   const cleanLua = luaText.replace(/--.*$/gm, "");
-  const setFinder = /sets(?:[\.\[]['"]?[\w\d_ \-\+]+['"]?\]?)+\s*=\s*/g;
+
+  // Regex captures the path and allows colons for Tachi: Fudo
+  const setFinder = /sets((?:[\.\[]['"]?[\w\d_ \-\+:]+['"]?\]?)+)\s*=\s*/g;
   
   let match;
-  let foundAny = false;
-
   while ((match = setFinder.exec(cleanLua)) !== null) {
-    foundAny = true;
-    const fullMatch = match[0];
-    const path = fullMatch.replace(/sets[\.\[]?/, "").replace(/[\]\s=]+$/, "").replace(/['"]/g, "");
+    let path = match[1].trim();
+    if (path.startsWith('.')) path = path.substring(1);
     
     const startIndex = setFinder.lastIndex;
     const remainingText = cleanLua.substring(startIndex).trim();
 
-    if (remainingText.startsWith('{')) {
+    // CASE 1: set_combine(sets.path, {gear})
+    if (remainingText.startsWith('set_combine')) {
+      // 1. Extract the base set path from inside the parentheses
+      // This looks for something like sets.precast.WS.Acc
+      const baseSetMatch = remainingText.match(/set_combine\s*\(\s*sets((?:[\.\[]['"]?[\w\d_ \-\+:]+['"]?\]?)+)/);
+      
+      let baseGear: GearSet = {};
+      if (baseSetMatch) {
+        let baseSetPath = baseSetMatch[1].trim();
+        if (baseSetPath.startsWith('.')) baseSetPath = baseSetPath.substring(1);
+        
+        // If we have already parsed the base set, grab its gear
+        if (sets[baseSetPath]) {
+          baseGear = JSON.parse(JSON.stringify(sets[baseSetPath]));
+        }
+      }
+
+      // 2. Find the curly braces for the NEW gear
+      let depth = 0;
+      let endIndex = -1;
+      const absoluteStart = cleanLua.indexOf('{', startIndex);
+      
+      if (absoluteStart !== -1) {
+        for (let i = absoluteStart; i < cleanLua.length; i++) {
+          if (cleanLua[i] === '{') depth++;
+          else if (cleanLua[i] === '}') depth--;
+          if (depth === 0) {
+            endIndex = i;
+            break;
+          }
+        }
+
+        if (endIndex !== -1) {
+          const setBlock = cleanLua.substring(absoluteStart + 1, endIndex);
+          const newGear = parseGearBlock(setBlock);
+          
+          // 3. MERGE: Spread baseGear first, then newGear to overwrite slots
+          sets[path] = { ...baseGear, ...newGear };
+          logs.push({ status: 'success', message: `Combined ${path} with base gear`, path });
+        }
+      }
+    } 
+    // CASE 2: Standard Table Definition { ... }
+    else if (remainingText.startsWith('{')) {
       let depth = 0;
       let endIndex = -1;
       const absoluteStart = cleanLua.indexOf('{', startIndex);
@@ -55,6 +97,17 @@ export const parseLuaToSets = (luaText: string): ParseResult => {
       if (endIndex !== -1) {
         const setBlock = cleanLua.substring(absoluteStart + 1, endIndex);
         sets[path] = parseGearBlock(setBlock);
+      }
+    }
+    // CASE 3: Simple Pointer (A = B)
+    else if (remainingText.startsWith('sets')) {
+      const pointerMatch = remainingText.match(/^sets((?:[\.\[]['"]?[\w\d_ \-\+:]+['"]?\]?)+)/);
+      if (pointerMatch) {
+        let sourcePath = pointerMatch[1].trim();
+        if (sourcePath.startsWith('.')) sourcePath = sourcePath.substring(1);
+        if (sets[sourcePath]) {
+          sets[path] = JSON.parse(JSON.stringify(sets[sourcePath]));
+        }
       }
     }
   }

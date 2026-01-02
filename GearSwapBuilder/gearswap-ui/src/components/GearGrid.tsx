@@ -96,10 +96,14 @@ export function GearGrid() {
         </div>
 
         {/* Global Variants Section */}
-        <div className="mt-8 border-t border-white/10 pt-8">
-          <h3 className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-4">Manual Variants</h3>
-          <AddVariantDialog />
-        </div>
+        <div className="mt-8 border-t border-white/10 pt-8 px-4"> {/* Added px-4 here */}
+  <h3 className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-4">
+    Manual Variants
+  </h3>
+  <div className="relative"> {/* Wrap in relative to manage z-index if needed */}
+     <AddVariantDialog />
+  </div>
+</div>
 
         <DeleteConfirmDialog
           open={!!deleteTarget}

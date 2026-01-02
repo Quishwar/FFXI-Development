@@ -6,11 +6,13 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 import { useGearStore, EquippedItem } from "@/store/useGearStore";
 import { cn } from "@/lib/utils";
 import { Edit3, Trash2, Copy } from "lucide-react";
+import { AugmentModal } from "./gear/augment-modal";
 
 export function SlotPicker({ slot, setName }: { slot: string; setName: string }) {
   const { allSets, updateSlot, searchableItems } = useGearStore();
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
+  const [isAugmentModalOpen, setIsAugmentModalOpen] = useState(false);
 
   const itemData = allSets[setName]?.[slot];
 
@@ -140,12 +142,12 @@ export function SlotPicker({ slot, setName }: { slot: string; setName: string })
               Item Options
             </div>
             <ContextMenuItem 
-              className="text-xs text-white/80 focus:bg-brand/30 focus:text-white cursor-pointer gap-2 py-2"
-              onSelect={() => {/* Future: Open Augment Modal */}}
-            >
-              <Edit3 size={14} className="text-lua-green" />
-              Edit Augments
-            </ContextMenuItem>
+    className="text-xs text-white/80 focus:bg-brand/30 focus:text-white cursor-pointer gap-2 py-2"
+    onSelect={() => setIsAugmentModalOpen(true)} // TRIGGER MODAL HERE
+  >
+    <Edit3 size={14} className="text-lua-green" />
+    Edit Augments
+  </ContextMenuItem>
             
             <ContextMenuItem 
               className="text-xs text-white/80 focus:bg-brand/30 focus:text-white cursor-pointer gap-2 py-2"
@@ -166,6 +168,12 @@ export function SlotPicker({ slot, setName }: { slot: string; setName: string })
             </ContextMenuItem>
           </ContextMenuContent>
         </ContextMenu>
+        <AugmentModal 
+    item={typedItem || { name: "" }} 
+    isOpen={isAugmentModalOpen} 
+    onOpenChange={setIsAugmentModalOpen}
+    onUpdate={(newData) => updateSlot(setName, slot, newData)}
+  />
       </div>
     </TooltipProvider>
   );
