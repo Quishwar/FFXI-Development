@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import * as Dialog from "@radix-ui/react-dialog";
+import * as VisuallyHidden from "@radix-ui/react-visually-hidden"; // Optional: npm install @radix-ui/react-visually-hidden
 import { useGearStore } from "../store/useGearStore";
 import { Input } from "@/components/ui/input";
 import { Button } from "./ui/button";
@@ -11,6 +12,12 @@ export function AddSetDialog() {
     const [setName, setSetName] = useState("");
     const { addSet, setActiveTab } = useGearStore();
 
+    // Helper to close and clear
+    const handleClose = () => {
+        setSetName("");
+        setOpen(false);
+    };
+
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (setName.trim()) {
@@ -20,13 +27,18 @@ export function AddSetDialog() {
 
             addSet(formattedName);
             setActiveTab(formattedName);
-            setSetName("");
-            setOpen(false);
+            handleClose(); // Clears and closes
         }
     };
 
     return (
-        <Dialog.Root open={open} onOpenChange={setOpen}>
+        <Dialog.Root 
+            open={open} 
+            onOpenChange={(isOpen) => {
+                if (!isOpen) setSetName(""); // Clear text when clicking outside/ESC
+                setOpen(isOpen);
+            }}
+        >
             <Dialog.Trigger asChild>
                 <Button
                     variant="outline"
@@ -50,9 +62,15 @@ export function AddSetDialog() {
                         "classic:rounded-none dark:rounded-2xl"
                     )}>
                         <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                            <Dialog.Title className="text-[10px] font-bold text-white uppercase tracking-[0.2em]">
+                            <Dialog.Title className="text-[10px] font-bold text-white [[data-theme='ffxi']_&]:text-white uppercase tracking-[0.2em]">
                                 Create <span className="text-brand">New Gear Set</span>
                             </Dialog.Title>
+                            
+                            {/* FIX: Resolves the Radix Warning by providing a description */}
+                            <Dialog.Description className="sr-only">
+                                Enter a new GearSwap set path name to add it to your configuration.
+                            </Dialog.Description>
+
                             <Dialog.Close className="ff-interactive text-white/40 hover:text-white transition-colors">
                                 <X className="w-4 h-4" />
                             </Dialog.Close>
@@ -60,14 +78,14 @@ export function AddSetDialog() {
 
                         <form onSubmit={handleSubmit} className="space-y-6 pt-2">
                             <div className="space-y-3">
-                                <label className="text-[9px] uppercase tracking-widest text-white/40 font-bold">
+                                <label className="text-[9px] uppercase tracking-widest text-white/40 [[data-theme='ffxi']_&]:text-white/60 font-bold">
                                     Set Path Name
                                 </label>
                                 <Input
                                     autoFocus
                                     className={cn(
                                         "w-full bg-black/40 border border-white/10 p-3 font-mono text-sm focus:border-brand/50 outline-none transition-all placeholder:text-white/10",
-                                        "text-[var(--active-text)]", // Keeps text readable in both themes
+                                        "text-white [[data-theme='ffxi']_&]:text-white", 
                                         "classic:rounded-none dark:rounded-lg"
                                     )}
                                     placeholder="e.g. idle.town"
@@ -80,7 +98,7 @@ export function AddSetDialog() {
                                 <Button
                                     type="button"
                                     variant="ghost"
-                                    onClick={() => setOpen(false)}
+                                    onClick={handleClose} // Uses handleClose to clear state
                                     className={cn(
                                         "ff-interactive text-[10px] font-bold uppercase tracking-widest text-white/60 hover:text-white",
                                         "classic:rounded-none rounded-lg"
@@ -92,14 +110,7 @@ export function AddSetDialog() {
                                     type="submit"
                                     className={cn(
                                         "ff-interactive px-8 bg-brand font-bold text-[10px] uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(var(--brand-rgb),0.4)] border-none",
-                                        // Logic: 
-                                        // 1. "text-[var(--active-text)]" uses your CSS variables:
-                                        //    Dark mode -> #ffffff (White)
-                                        //    FFXI mode -> #000000 (Black)
-                                        // 2. We use "!" to override the hover logic in index.css
-                                        "!text-[var(--active-text)]",
-
-                                        // Rounding logic (kept exactly as you requested)
+                                        "[[data-theme='ffxi']_&]:!text-black !text-white", 
                                         "classic:rounded-none dark:rounded-lg"
                                     )}
                                 >

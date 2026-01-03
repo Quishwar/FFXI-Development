@@ -40,8 +40,10 @@ export function Sidebar() {
         };
 
         Object.keys(filteredSets).forEach(path => {
-            const cleanPath = path.startsWith('sets.') ? path.replace('sets.', '') : path;
-            const root = cleanPath.split(/[.[]/)[0];
+            // Standardize path for root detection
+            const cleanPath = path.startsWith('sets.') ? path.substring(5) : path;
+            const root = cleanPath.split(/[.\[]/)[0];
+            
             if (!categories[root] && root !== "") {
                 const config = iconMap[root] || { icon: Folder, color: 'text-zinc-500' };
                 categories[root] = { label: root.toUpperCase(), ...config };
@@ -50,7 +52,6 @@ export function Sidebar() {
         return categories;
     }, [filteredSets]);
 
-    // Custom sort to force IDLE to the top
     const sortedCategories = useMemo(() => {
         return Object.entries(derivedCategories).sort(([a], [b]) => {
             if (a === 'idle') return -1;
@@ -64,7 +65,6 @@ export function Sidebar() {
             bg-ui-window 
             [[data-theme='ffxi']_&]:bg-[linear-gradient(180deg,#000080_0%,#000033_100%)]">
             
-            {/* STICKY HEADER - Transparent in FFXI mode to allow the gradient to flow behind it */}
             <div className="sticky top-0 z-20 px-5 pt-5 pb-4 border-b border-black/60 shadow-lg 
                 bg-ui-window 
                 [[data-theme='ffxi']_&]:bg-transparent [[data-theme='ffxi']_&]:shadow-none">
@@ -72,10 +72,9 @@ export function Sidebar() {
             </div>
 
             <div className="flex-1 overflow-y-auto p-5 pt-2 space-y-4 custom-scrollbar">
-                
                 {sortedCategories.map(([catId, config]) => {
                     const setsInCategory = Object.keys(filteredSets).filter(path => {
-                        const clean = path.startsWith('sets.') ? path.replace('sets.', '') : path;
+                        const clean = path.startsWith('sets.') ? path.substring(5) : path;
                         return clean === catId || clean.startsWith(`${catId}.`) || clean.startsWith(`${catId}[`);
                     });
 
@@ -104,6 +103,9 @@ export function Sidebar() {
                                 <div className="mt-1 space-y-1 border-l-2 border-white/5 ml-4 pl-3">
                                     {setsInCategory.sort().map(path => {
                                         const isActive = activeTab === path;
+                                        // Display name strips the 'sets.' but the key remains 'sets.path'
+                                        const displayName = path.startsWith('sets.') ? path.substring(5) : path;
+
                                         return (
                                             <Button
                                                 key={path}
@@ -123,7 +125,7 @@ export function Sidebar() {
                                                 }`} />
                                                 
                                                 <span className={`text-[11px] font-mono truncate tracking-tight uppercase ${isActive ? 'font-black' : 'font-medium'}`}>
-                                                    {path.replace('sets.', '')}
+                                                    {displayName}
                                                 </span>
                                             </Button>
                                         );

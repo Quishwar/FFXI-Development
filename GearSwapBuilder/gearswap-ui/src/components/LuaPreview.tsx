@@ -1,7 +1,6 @@
 import React from "react";
 import { useGearStore, EquippedItem } from "../store/useGearStore";
 
-// Mapping internal IDs to your specific Gearswap Slot Names
 const SLOT_MAP: Record<string, string> = {
   main: "main", sub: "sub", range: "range", ammo: "ammo",
   head: "head", neck: "neck", 
@@ -28,12 +27,19 @@ export function LuaPreview() {
                     bg-[#0a0a0c] [[data-theme='ffxi']_&]:bg-[linear-gradient(180deg,#000080_0%,#000033_100%)]">
       
       {visibleSets.map(([setName, gear]) => {
-        const [base, ...vParts] = setName.split('.');
-        const variant = vParts.length > 0 ? `.${vParts.join('.')}` : "";
+        // 1. Strip 'sets.' from the start so we only work with the actual path
+        const pathOnly = setName.startsWith('sets.') ? setName.substring(5) : setName;
+        
+        // 2. Break the path into the first real word (base) and the rest (variant)
+        // e.g. "precast.WS" -> base: "precast", variant: ".WS"
+        const parts = pathOnly.split('.');
+        const base = parts[0];
+        const variant = parts.length > 1 ? `.${parts.slice(1).join('.')}` : "";
 
         return (
           <div key={setName} className="mb-8 select-all leading-normal">
             <div className="text-zinc-400">
+              {/* Always start with 'sets.' once, then add the components */}
               sets.<span className="text-amber-500">{base}</span>
               <span className="text-emerald-500">{variant}</span> = {" {"}
             </div>
@@ -44,7 +50,6 @@ export function LuaPreview() {
               
               if (!itemData || itemData === "None" || itemData === "empty" || itemData === "") return null;
 
-              // --- STRING RENDER ---
               if (typeof itemData === 'string') {
                 return (
                   <div key={slotKey} className="pl-4 whitespace-nowrap">
@@ -56,7 +61,6 @@ export function LuaPreview() {
                 );
               }
 
-              // --- OBJECT RENDER (Matches your spacing and brace style) ---
               const item = itemData as EquippedItem;
               const displayAugs: string[] = [];
               if (item.path) displayAugs.push(`Path: ${item.path}`);

@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-// 1. Keep these definitions here at the top
+// --- Types ---
+
 export type EquippedItem = {
   name: string;
   augments?: string[];
@@ -12,8 +13,8 @@ export type EquippedItem = {
 export type GearSet = Record<string, string | EquippedItem>;
 
 interface GearStore {
-  // 2. Use the GearSet type for better type safety
   allSets: Record<string, GearSet>;
+  baseSets: Record<string, string>; // Tracks inheritance: { "sets.midcast.WS": "sets.precast.WS" }
   activeTab: string;
   theme: 'dark' | 'ffxi';
   searchableItems: Record<string, string[]>;
@@ -23,27 +24,31 @@ interface GearStore {
   characterName: string;
   jobName: string;
 
+  // Actions
   setCharacterInfo: (name: string, job: string) => void;
   setTheme: (theme: 'dark' | 'ffxi') => void;
   setActiveTab: (tab: string) => void;
   setSearchTerm: (term: string) => void;
   setLuaCode: (code: string) => void;
   setMode: (mode: string, option: string) => void;
-  addSet: (name: string) => void;
+  addSet: (name: string, baseSet?: string) => void;
   removeSet: (name: string) => void;
-  // 3. Update 'item' type here
   updateSlot: (setName: string, slot: string, item: string | EquippedItem) => void;
   clearSet: (setName: string) => void;
   clearSets: () => void;
   initializeItems: (data: Record<string, string[]>) => void;
-  importSets: (incomingSets: Record<string, GearSet>) => void;
+  importSets: (incomingSets: Record<string, GearSet>, bases?: Record<string, string>) => void;
   updateAugments: (setName: string, slot: string, augs: Partial<EquippedItem>) => void;
+  setBaseSets: (bases: Record<string, string>) => void;
 }
+
+// --- Store Implementation ---
 
 export const useGearStore = create<GearStore>()(
   persist(
     (set) => ({
       allSets: { "sets.idle": {}, "sets.engaged": {} },
+      baseSets: {},
       activeTab: "sets.idle",
       theme: 'dark',
       searchableItems: {},
@@ -54,10 +59,16 @@ export const useGearStore = create<GearStore>()(
       jobName: "",
 
       setCharacterInfo: (name, job) => set({ characterName: name, jobName: job }),
+      
       initializeItems: (data) => set({ searchableItems: data }),
+      
       setTheme: (theme) => set({ theme }),
+      
       setActiveTab: (tab) => set({ activeTab: tab }),
+      
       setSearchTerm: (term) => set({ searchTerm: term }),
+
+      setBaseSets: (bases) => set({ baseSets: bases }),
 
       setLuaCode: (code) => set((state) => {
         const stateRegex = /state\.(\w+):options\((.*?)\)/g;
@@ -77,6 +88,7 @@ export const useGearStore = create<GearStore>()(
 
       clearSets: () => set({
         allSets: { "sets.idle": {}, "sets.engaged": {} },
+        baseSets: {},
         activeTab: "sets.idle",
         searchTerm: "",
         luaCode: "",
@@ -85,10 +97,15 @@ export const useGearStore = create<GearStore>()(
         jobName: ""
       }),
 
-      addSet: (name) => set((state) => {
+      addSet: (name, baseSet) => set((state) => {
         const cleanName = name.startsWith('sets.') ? name : `sets.${name}`;
+        const newBases = { ...state.baseSets };
+        if (baseSet) {
+          newBases[cleanName] = baseSet;
+        }
         return {
           allSets: { ...state.allSets, [cleanName]: {} },
+          baseSets: newBases,
           activeTab: cleanName
         };
       }),
@@ -97,11 +114,12 @@ export const useGearStore = create<GearStore>()(
         allSets: { ...state.allSets, [setName]: {} }
       })),
 
-      importSets: (incomingSets) => set((state) => {
+      importSets: (incomingSets, bases = {}) => set((state) => {
         const keys = Object.keys(incomingSets);
         return {
           ...state,
           allSets: incomingSets,
+          baseSets: bases,
           activeTab: keys.find(k => k === 'sets.idle') || keys[0] || "sets.idle"
         };
       }),
@@ -125,10 +143,14 @@ export const useGearStore = create<GearStore>()(
 
       removeSet: (setKey) => set((state) => {
         const newSets = { ...state.allSets };
+        const newBases = { ...state.baseSets };
         delete newSets[setKey];
+        delete newBases[setKey];
+
         if (Object.keys(newSets).length === 0) {
           return {
             allSets: { "sets.idle": {}, "sets.engaged": {} },
+            baseSets: {},
             activeTab: "sets.idle"
           };
         }
@@ -136,7 +158,7 @@ export const useGearStore = create<GearStore>()(
         if (state.activeTab === setKey) {
           nextActiveTab = Object.keys(newSets)[0];
         }
-        return { allSets: newSets, activeTab: nextActiveTab };
+        return { allSets: newSets, baseSets: newBases, activeTab: nextActiveTab };
       }),
 
       updateSlot: (setName, slot, item) => set((state) => ({
@@ -144,7 +166,7 @@ export const useGearStore = create<GearStore>()(
           ...state.allSets,
           [setName]: {
             ...state.allSets[setName],
-            [slot]: item, // 'item' here can be a string OR an EquippedItem object
+            [slot]: item,
           }
         }
       })),
@@ -152,6 +174,7 @@ export const useGearStore = create<GearStore>()(
     {
       name: 'gearswap-studio-storage',
       partialize: (state) => {
+        // We don't persist searchableItems or searchTerm to keep localstorage light
         const { searchableItems, searchTerm, ...rest } = state;
         return rest as GearStore;
       },

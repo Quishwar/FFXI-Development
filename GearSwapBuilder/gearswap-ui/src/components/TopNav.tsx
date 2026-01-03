@@ -6,17 +6,20 @@ import { Download, Upload, Trash2, Swords, Search, X } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
 import { parseLuaToSets } from "@/lib/luaImporter";
+import { generateUpdatedLua } from "@/lib/luaexporter";
 
 export function TopNav() {
-  const { 
-    allSets, 
-    importSets, 
-    clearSets, 
-    setActiveTab, 
-    searchTerm, 
+  const {
+    allSets,
+    baseSets,
+    importSets,
+    clearSets,
+    setActiveTab,
+    searchTerm,
     setSearchTerm,
     setLuaCode,
     characterName,
+    luaCode,
     jobName,
     setCharacterInfo
   } = useGearStore();
@@ -30,7 +33,6 @@ export function TopNav() {
     const file = event.target.files?.[0];
     if (!file) return;
 
-    // Parse "Name_Job.lua"
     const fileName = file.name.replace('.lua', '');
     const [rawName, rawJob] = fileName.split('_');
     if (rawName && rawJob) {
@@ -43,9 +45,9 @@ export function TopNav() {
       if (!text) return;
 
       try {
-        setLuaCode(text); 
-        const { sets, logs } = parseLuaToSets(text);
-        importSets(sets);
+        setLuaCode(text);
+        const { sets, baseSets: importedBases } = parseLuaToSets(text);
+        importSets(sets, importedBases);
 
         const paths = Object.keys(sets);
         const idlePath = paths.find(p => p.toLowerCase().includes('idle')) || paths[0];
@@ -54,10 +56,47 @@ export function TopNav() {
       } catch (err) {
         console.error("Import Error:", err);
       }
-
       if (fileInputRef.current) fileInputRef.current.value = "";
     };
     reader.readAsText(file);
+  };
+
+  const handleExport = async () => {
+    // Logic fix: Pass 3 arguments to preserve set_combine structure
+    const finalLua = generateUpdatedLua(luaCode, allSets, baseSets);
+    const fileName = characterName && jobName ? `${characterName}_${jobName}_Gear.lua` : "Exported_Gear.lua";
+
+    // RESTORED: File System Access API (Save Picker)
+    if ('showSaveFilePicker' in window) {
+      try {
+        const handle = await (window as any).showSaveFilePicker({
+          suggestedName: fileName,
+          types: [{
+            description: 'Lua Script',
+            accept: { 'text/x-lua': ['.lua'] },
+          }],
+        });
+
+        const writable = await handle.createWritable();
+        await writable.write(finalLua);
+        await writable.close();
+        return; 
+      } catch (err) {
+        if ((err as Error).name === 'AbortError') return;
+        console.error("File Picker failed, falling back to download", err);
+      }
+    }
+
+    // FALLBACK: Standard Download
+    const blob = new Blob([finalLua], { type: "text/x-lua" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = fileName;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
   };
 
   return (
@@ -68,7 +107,7 @@ export function TopNav() {
         <div className="flex items-center gap-4 shrink-0 min-w-[300px]">
           <div className="w-10 h-10 rounded-full bg-brand/20 border border-brand/50 flex items-center justify-center shadow-[0_0_15px_rgba(var(--brand-rgb),0.2)]">
             {jobName ? (
-               <span className="text-brand font-black text-[10px] tracking-tighter">{jobName.substring(0, 3)}</span>
+              <span className="text-brand font-black text-[10px] tracking-tighter">{jobName.substring(0, 3)}</span>
             ) : (
               <Swords className="text-brand w-5 h-5" />
             )}
@@ -79,18 +118,12 @@ export function TopNav() {
             </h1>
             {characterName ? (
               <div className="flex items-center gap-1.5 mt-1">
-                <span className="text-[10px] text-zinc-300 font-bold uppercase tracking-wider">
-                  {characterName}
-                </span>
+                <span className="text-[10px] text-zinc-300 font-bold uppercase tracking-wider">{characterName}</span>
                 <span className="text-[10px] text-zinc-600 font-bold">/</span>
-                <span className="text-[10px] text-brand font-bold uppercase tracking-wider">
-                  {jobName}
-                </span>
+                <span className="text-[10px] text-brand font-bold uppercase tracking-wider">{jobName}</span>
               </div>
             ) : (
-              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.2em] mt-1">
-                No File Loaded
-              </p>
+              <p className="text-[10px] text-zinc-500 font-bold uppercase tracking-[0.2em] mt-1">No File Loaded</p>
             )}
           </div>
         </div>
@@ -132,7 +165,11 @@ export function TopNav() {
             Import
           </Button>
 
-          <Button variant="ghost" className="ff-interactive text-[10px] uppercase font-bold tracking-widest text-zinc-400 hover:text-white">
+          <Button
+            variant="ghost"
+            className="ff-interactive text-[10px] uppercase font-bold tracking-widest text-zinc-400 hover:text-white"
+            onClick={handleExport}
+          >
             <Download className="w-4 h-4 mr-2 text-brand" />
             Export
           </Button>

@@ -16,17 +16,20 @@ export interface ImportLog {
 
 export interface ParseResult {
   sets: AllSets;
+  baseSets: Record<string, string>; // Add this line
   logs: ImportLog[];
 }
 
+/**
+ * FULL IMPORTER
+ * Now handles set_combine by only capturing overrides to keep files tidy.
+ */
 export const parseLuaToSets = (luaText: string): ParseResult => {
-  console.log("--- Parser Started ---");
   const sets: AllSets = {};
+  const baseSets: Record<string, string> = {}; // 2. Initialize the map
   const logs: ImportLog[] = [];
   
   const cleanLua = luaText.replace(/--.*$/gm, "");
-
-  // Regex captures the path and allows colons for Tachi: Fudo
   const setFinder = /sets((?:[\.\[]['"]?[\w\d_ \-\+:]+['"]?\]?)+)\s*=\s*/g;
   
   let match;
@@ -37,74 +40,42 @@ export const parseLuaToSets = (luaText: string): ParseResult => {
     const startIndex = setFinder.lastIndex;
     const remainingText = cleanLua.substring(startIndex).trim();
 
-    // CASE 1: set_combine(sets.path, {gear})
     if (remainingText.startsWith('set_combine')) {
-      // 1. Extract the base set path from inside the parentheses
-      // This looks for something like sets.precast.WS.Acc
       const baseSetMatch = remainingText.match(/set_combine\s*\(\s*sets((?:[\.\[]['"]?[\w\d_ \-\+:]+['"]?\]?)+)/);
       
-      let baseGear: GearSet = {};
+      // 3. Capture the base set relationship
       if (baseSetMatch) {
-        let baseSetPath = baseSetMatch[1].trim();
-        if (baseSetPath.startsWith('.')) baseSetPath = baseSetPath.substring(1);
-        
-        // If we have already parsed the base set, grab its gear
-        if (sets[baseSetPath]) {
-          baseGear = JSON.parse(JSON.stringify(sets[baseSetPath]));
-        }
+        let baseSetName = baseSetMatch[1].replace(/^\./, "").trim();
+        baseSets[path] = `sets.${baseSetName}`; 
       }
 
-      // 2. Find the curly braces for the NEW gear
-      let depth = 0;
-      let endIndex = -1;
       const absoluteStart = cleanLua.indexOf('{', startIndex);
-      
-      if (absoluteStart !== -1) {
-        for (let i = absoluteStart; i < cleanLua.length; i++) {
-          if (cleanLua[i] === '{') depth++;
-          else if (cleanLua[i] === '}') depth--;
-          if (depth === 0) {
-            endIndex = i;
-            break;
-          }
-        }
+      const endIndex = findClosingBrace(cleanLua, absoluteStart);
 
-        if (endIndex !== -1) {
-          const setBlock = cleanLua.substring(absoluteStart + 1, endIndex);
-          const newGear = parseGearBlock(setBlock);
-          
-          // 3. MERGE: Spread baseGear first, then newGear to overwrite slots
-          sets[path] = { ...baseGear, ...newGear };
-          logs.push({ status: 'success', message: `Combined ${path} with base gear`, path });
-        }
+      if (absoluteStart !== -1 && endIndex !== -1) {
+        const setBlock = cleanLua.substring(absoluteStart + 1, endIndex);
+        sets[path] = parseGearBlock(setBlock);
+        
+        logs.push({ 
+          status: 'success', 
+          message: `Imported overrides for ${path}`, 
+          path 
+        });
       }
     } 
-    // CASE 2: Standard Table Definition { ... }
     else if (remainingText.startsWith('{')) {
-      let depth = 0;
-      let endIndex = -1;
       const absoluteStart = cleanLua.indexOf('{', startIndex);
-      
-      for (let i = absoluteStart; i < cleanLua.length; i++) {
-        if (cleanLua[i] === '{') depth++;
-        else if (cleanLua[i] === '}') depth--;
-        if (depth === 0) {
-          endIndex = i;
-          break;
-        }
-      }
+      const endIndex = findClosingBrace(cleanLua, absoluteStart);
 
       if (endIndex !== -1) {
         const setBlock = cleanLua.substring(absoluteStart + 1, endIndex);
         sets[path] = parseGearBlock(setBlock);
       }
     }
-    // CASE 3: Simple Pointer (A = B)
     else if (remainingText.startsWith('sets')) {
       const pointerMatch = remainingText.match(/^sets((?:[\.\[]['"]?[\w\d_ \-\+:]+['"]?\]?)+)/);
       if (pointerMatch) {
-        let sourcePath = pointerMatch[1].trim();
-        if (sourcePath.startsWith('.')) sourcePath = sourcePath.substring(1);
+        let sourcePath = pointerMatch[1].trim().replace(/^\./, "");
         if (sets[sourcePath]) {
           sets[path] = JSON.parse(JSON.stringify(sets[sourcePath]));
         }
@@ -112,9 +83,27 @@ export const parseLuaToSets = (luaText: string): ParseResult => {
     }
   }
 
-  return { sets, logs };
+  // 4. Return the baseSets along with sets and logs
+  return { sets, baseSets, logs };
 };
 
+/**
+ * Helper to find the matching closing brace for any nested level
+ */
+function findClosingBrace(text: string, startIdx: number): number {
+  if (startIdx === -1) return -1;
+  let depth = 0;
+  for (let i = startIdx; i < text.length; i++) {
+    if (text[i] === '{') depth++;
+    else if (text[i] === '}') depth--;
+    if (depth === 0) return i;
+  }
+  return -1;
+}
+
+/**
+ * Parses the internal content of a gear set
+ */
 function parseGearBlock(block: string): GearSet {
   const gear: GearSet = {};
   const slotMap: Record<string, string> = {
@@ -122,10 +111,8 @@ function parseGearBlock(block: string): GearSet {
     left_ring: "ring1", right_ring: "ring2"
   };
 
-  /**
-   * 1. TABLE PARSING (slot={...})
-   * Uses backreferences \2 to ensure name="Mpaca's Cap" captures the whole string
-   */
+  // 1. Parse Table Items: slot={name="...", augments={...}}
+  // Handles nested braces for augments correctly
   const tableRegex = /([\w\d_]+)\s*=\s*\{([^{}]*?\{[^{}]*?\}[^{}]*?|[^{}]*?)\}/g;
   
   let match;
@@ -136,11 +123,11 @@ function parseGearBlock(block: string): GearSet {
     const slot = slotMap[rawSlot] || rawSlot;
     const content = match[2];
 
-    // Refined name match: matches starting quote and only stops at the same ending quote
     const nameMatch = content.match(/name\s*=\s*(["'])(.*?)\1/);
     if (nameMatch) {
       const item: EquippedItem = { name: nameMatch[2].trim() };
 
+      // Cleanly extract augments
       if (content.includes("augments")) {
         const augStart = content.indexOf('{', content.indexOf('augments'));
         const augEnd = content.indexOf('}', augStart);
@@ -152,7 +139,6 @@ function parseGearBlock(block: string): GearSet {
         }
       }
       
-      // Path and Rank matches
       const pathMatch = content.match(/path\s*=\s*(["'])(.*?)\1/);
       if (pathMatch) item.path = pathMatch[2];
 
@@ -163,14 +149,13 @@ function parseGearBlock(block: string): GearSet {
     }
   }
 
-  /**
-   * 2. STRING PARSING (slot="Item Name")
-   * Updated to handle apostrophes correctly
-   */
+  // 2. Parse Simple Strings: slot="Item Name"
   const stringRegex = /([\w\d_]+)\s*=\s*(["'])(.*?)\2/g;
   while ((match = stringRegex.exec(block)) !== null) {
-    const slot = slotMap[match[1].toLowerCase()] || match[1].toLowerCase();
-    // Don't overwrite if we already found a table version of this slot
+    const slotName = match[1].toLowerCase();
+    const slot = slotMap[slotName] || slotName;
+    
+    // Skip if it's a property or already filled by a table
     if (!gear[slot] && !['name', 'path', 'augments'].includes(slot)) {
       gear[slot] = match[3].trim();
     }
