@@ -45,7 +45,7 @@ export const parseLuaToSets = (luaText: string): ParseResult => {
       
       // 3. Capture the base set relationship
       if (baseSetMatch) {
-        let baseSetName = baseSetMatch[1].replace(/^\./, "").trim();
+        const baseSetName = baseSetMatch[1].replace(/^\./, "").trim();
         baseSets[path] = `sets.${baseSetName}`; 
       }
 
@@ -75,7 +75,7 @@ export const parseLuaToSets = (luaText: string): ParseResult => {
     else if (remainingText.startsWith('sets')) {
       const pointerMatch = remainingText.match(/^sets((?:[\.\[]['"]?[\w\d_ \-\+:]+['"]?\]?)+)/);
       if (pointerMatch) {
-        let sourcePath = pointerMatch[1].trim().replace(/^\./, "");
+        const sourcePath = pointerMatch[1].trim().replace(/^\./, "");
         if (sets[sourcePath]) {
           sets[path] = JSON.parse(JSON.stringify(sets[sourcePath]));
         }

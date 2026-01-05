@@ -14,10 +14,11 @@ export type GearSet = Record<string, string | EquippedItem>;
 
 interface GearStore {
   allSets: Record<string, GearSet>;
-  baseSets: Record<string, string>; // Tracks inheritance: { "sets.midcast.WS": "sets.precast.WS" }
+  baseSets: Record<string, string>;
   activeTab: string;
   theme: 'dark' | 'ffxi';
   searchableItems: Record<string, string[]>;
+  isLoadingItems: boolean;
   searchTerm: string;
   luaCode: string;
   selectedModes: Record<string, string>;
@@ -36,6 +37,7 @@ interface GearStore {
   updateSlot: (setName: string, slot: string, item: string | EquippedItem) => void;
   clearSet: (setName: string) => void;
   clearSets: () => void;
+  setIsLoadingItems: (isLoading: boolean) => void;
   initializeItems: (data: Record<string, string[]>) => void;
   importSets: (incomingSets: Record<string, GearSet>, bases?: Record<string, string>) => void;
   updateAugments: (setName: string, slot: string, augs: Partial<EquippedItem>) => void;
@@ -52,6 +54,7 @@ export const useGearStore = create<GearStore>()(
       activeTab: "sets.idle",
       theme: 'dark',
       searchableItems: {},
+      isLoadingItems: false,
       searchTerm: "",
       luaCode: "",
       selectedModes: {},
@@ -59,13 +62,15 @@ export const useGearStore = create<GearStore>()(
       jobName: "",
 
       setCharacterInfo: (name, job) => set({ characterName: name, jobName: job }),
-      
-      initializeItems: (data) => set({ searchableItems: data }),
-      
+
+      setIsLoadingItems: (isLoading) => set({ isLoadingItems: isLoading }),
+
+      initializeItems: (data) => set({ searchableItems: data, isLoadingItems: false }),
+
       setTheme: (theme) => set({ theme }),
-      
+
       setActiveTab: (tab) => set({ activeTab: tab }),
-      
+
       setSearchTerm: (term) => set({ searchTerm: term }),
 
       setBaseSets: (bases) => set({ baseSets: bases }),
@@ -74,10 +79,18 @@ export const useGearStore = create<GearStore>()(
         const stateRegex = /state\.(\w+):options\((.*?)\)/g;
         const initialModes: Record<string, string> = {};
         let match;
+
         while ((match = stateRegex.exec(code)) !== null) {
-          const [_, modeName, optionsRaw] = match;
-          const firstOption = optionsRaw.split(',')[0].replace(/['"\s]/g, '');
-          initialModes[modeName.replace('Mode', '')] = firstOption;
+          const [, modeName, optionsRaw] = match;
+          // Extract the first option, handling both ' and " and extra spaces
+          const firstOptionMatch = optionsRaw.match(/['"](.*?)['"]/);
+          if (firstOptionMatch) {
+            const mode = modeName.replace('Mode', '');
+            // Only set if not already present to avoid overriding user selections
+            if (!initialModes[mode]) {
+              initialModes[mode] = firstOptionMatch[1];
+            }
+          }
         }
         return { luaCode: code, selectedModes: initialModes };
       }),
@@ -174,8 +187,10 @@ export const useGearStore = create<GearStore>()(
     {
       name: 'gearswap-studio-storage',
       partialize: (state) => {
-        // We don't persist searchableItems or searchTerm to keep localstorage light
-        const { searchableItems, searchTerm, ...rest } = state;
+        const rest = { ...state };
+        delete (rest as any).searchableItems;
+        delete (rest as any).searchTerm;
+        delete (rest as any).isLoadingItems;
         return rest as GearStore;
       },
     }

@@ -5,14 +5,16 @@ import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger, C
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useGearStore, EquippedItem } from "@/store/useGearStore";
 import { cn } from "@/lib/utils";
-import { Edit3, Trash2, Copy } from "lucide-react";
+import { Edit3, Trash2, Copy, Loader2 } from "lucide-react";
 import { AugmentModal } from "./gear/augment-modal";
+import { useItemSearch } from "@/lib/hooks/useItemSearch";
 
 export function SlotPicker({ slot, setName }: { slot: string; setName: string }) {
-  const { allSets, updateSlot, searchableItems } = useGearStore();
-  const [search, setSearch] = useState("");
+  const { allSets, updateSlot, isLoadingItems } = useGearStore();
   const [open, setOpen] = useState(false);
   const [isAugmentModalOpen, setIsAugmentModalOpen] = useState(false);
+
+  const { search, setSearch, filteredItems } = useItemSearch(slot);
 
   const itemData = allSets[setName]?.[slot];
 
@@ -24,7 +26,7 @@ export function SlotPicker({ slot, setName }: { slot: string; setName: string })
 
   const displayName = typedItem?.name || "";
   const isEquipped = !!displayName;
-  
+
   const augments = typedItem?.augments || [];
   const hasAugments = augments.length > 0 || !!typedItem?.path || !!typedItem?.rank;
 
@@ -38,13 +40,12 @@ export function SlotPicker({ slot, setName }: { slot: string; setName: string })
                 <TooltipTrigger asChild>
                   <PopoverTrigger asChild>
                     <div className={cn(
-                      // We use "border-brand" to trigger your custom CSS inner glow
                       "ff-window ff-interactive flex flex-col p-3 min-h-[85px] h-full cursor-pointer transition-all relative !rounded-none border",
-                      isEquipped 
-                        ? "border-brand" // This activates your Section 5 CSS glow
+                      isEquipped
+                        ? "border-brand"
                         : "border-white/5 bg-black/40 hover:bg-white/5"
                     )}>
-                      
+
                       <div className="flex justify-between items-start">
                         <span className={cn(
                           "text-[9px] font-black uppercase tracking-[0.2em] transition-colors",
@@ -52,7 +53,7 @@ export function SlotPicker({ slot, setName }: { slot: string; setName: string })
                         )}>
                           {slot}
                         </span>
-                        
+
                         {hasAugments && (
                           <span className="text-[8px] bg-lua-green/20 text-lua-green px-1.5 py-0.5 border border-lua-green/30 font-bold rounded-[2px] shadow-[0_0_5px_rgba(34,197,94,0.3)]">
                             AUG
@@ -63,8 +64,8 @@ export function SlotPicker({ slot, setName }: { slot: string; setName: string })
                       <div className="flex-1 flex items-center justify-center py-1">
                         <div className={cn(
                           "text-[13px] text-center line-clamp-2 leading-tight tracking-wide",
-                          isEquipped 
-                            ? "text-white font-bold antialiased [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]" 
+                          isEquipped
+                            ? "text-white font-bold antialiased [text-shadow:0_1px_2px_rgba(0,0,0,0.5)]"
                             : "text-white/10 italic uppercase"
                         )}>
                           {displayName || "None"}
@@ -78,11 +79,11 @@ export function SlotPicker({ slot, setName }: { slot: string; setName: string })
                     </div>
                   </PopoverTrigger>
                 </TooltipTrigger>
-                
+
                 {isEquipped && (
                   <TooltipContent side="right" className="ff-tooltip !rounded-none z-[100]">
                     <div className="tooltip-title">{displayName}</div>
-                    
+
                     <div className="space-y-1 mt-2">
                       {typedItem?.path && (
                         <p className="text-lua-orange text-[12px] font-bold">Path: {typedItem.path}</p>
@@ -102,35 +103,40 @@ export function SlotPicker({ slot, setName }: { slot: string; setName: string })
                 )}
               </Tooltip>
 
-              {/* Popover/Search Content remains the same... */}
               <PopoverContent className="w-[260px] p-0 ff-window bg-black/95 backdrop-blur-xl border-white/20 shadow-2xl z-50 overflow-hidden !rounded-none">
                 <Command shouldFilter={false} className="bg-transparent text-white">
-                  <CommandInput 
-                    placeholder={`Search ${slot}...`} 
-                    value={search} 
+                  <CommandInput
+                    placeholder={`Search ${slot}...`}
+                    value={search}
                     onValueChange={setSearch}
-                    className="h-11 text-sm border-none bg-white/5 text-white placeholder:text-white/20" 
+                    className="h-11 text-sm border-none bg-white/5 text-white placeholder:text-white/20"
                   />
                   <CommandList className="max-h-72 custom-scrollbar">
-                    <CommandEmpty className="p-6 text-xs italic text-white/40 text-center">No results in database.</CommandEmpty>
-                    <CommandGroup>
-                      {(searchableItems[slot] || [])
-                        .filter(item => !search || item.toLowerCase().includes(search.toLowerCase()))
-                        .slice(0, 80)
-                        .map(item => (
-                          <CommandItem 
-                            key={item} 
-                            onSelect={() => { 
-                              updateSlot(setName, slot, item); 
-                              setSearch(""); 
-                              setOpen(false); 
-                            }} 
-                            className="ff-interactive text-xs py-3 px-8 text-white/70 hover:bg-brand/20 hover:text-white border-b border-white/5 last:border-0"
-                          >
-                            {item}
-                          </CommandItem>
-                        ))}
-                    </CommandGroup>
+                    {isLoadingItems ? (
+                      <div className="p-8 flex flex-col items-center justify-center gap-2 text-white/40">
+                        <Loader2 className="animate-spin" size={20} />
+                        <span className="text-[10px] uppercase font-bold tracking-widest">Loading Database...</span>
+                      </div>
+                    ) : (
+                      <>
+                        <CommandEmpty className="p-6 text-xs italic text-white/40 text-center">No results in database.</CommandEmpty>
+                        <CommandGroup>
+                          {filteredItems.map(item => (
+                            <CommandItem
+                              key={item}
+                              onSelect={() => {
+                                updateSlot(setName, slot, item);
+                                setSearch("");
+                                setOpen(false);
+                              }}
+                              className="ff-interactive text-xs py-3 px-8 text-white/70 hover:bg-brand/20 hover:text-white border-b border-white/5 last:border-0"
+                            >
+                              {item}
+                            </CommandItem>
+                          ))}
+                        </CommandGroup>
+                      </>
+                    )}
                   </CommandList>
                 </Command>
               </PopoverContent>
@@ -141,15 +147,15 @@ export function SlotPicker({ slot, setName }: { slot: string; setName: string })
             <div className="px-2 py-1.5 text-[10px] font-black text-white/30 uppercase tracking-tighter">
               Item Options
             </div>
-            <ContextMenuItem 
-    className="text-xs text-white/80 focus:bg-brand/30 focus:text-white cursor-pointer gap-2 py-2"
-    onSelect={() => setIsAugmentModalOpen(true)} // TRIGGER MODAL HERE
-  >
-    <Edit3 size={14} className="text-lua-green" />
-    Edit Augments
-  </ContextMenuItem>
-            
-            <ContextMenuItem 
+            <ContextMenuItem
+              className="text-xs text-white/80 focus:bg-brand/30 focus:text-white cursor-pointer gap-2 py-2"
+              onSelect={() => setIsAugmentModalOpen(true)}
+            >
+              <Edit3 size={14} className="text-lua-green" />
+              Edit Augments
+            </ContextMenuItem>
+
+            <ContextMenuItem
               className="text-xs text-white/80 focus:bg-brand/30 focus:text-white cursor-pointer gap-2 py-2"
               onSelect={() => navigator.clipboard.writeText(displayName)}
             >
@@ -159,7 +165,7 @@ export function SlotPicker({ slot, setName }: { slot: string; setName: string })
 
             <ContextMenuSeparator className="bg-white/10 my-1" />
 
-            <ContextMenuItem 
+            <ContextMenuItem
               className="text-xs text-red-400 focus:bg-red-500/20 focus:text-red-400 cursor-pointer gap-2 py-2"
               onSelect={() => updateSlot(setName, slot, "")}
             >
@@ -168,12 +174,12 @@ export function SlotPicker({ slot, setName }: { slot: string; setName: string })
             </ContextMenuItem>
           </ContextMenuContent>
         </ContextMenu>
-        <AugmentModal 
-    item={typedItem || { name: "" }} 
-    isOpen={isAugmentModalOpen} 
-    onOpenChange={setIsAugmentModalOpen}
-    onUpdate={(newData) => updateSlot(setName, slot, newData)}
-  />
+        <AugmentModal
+          item={typedItem || { name: "" }}
+          isOpen={isAugmentModalOpen}
+          onOpenChange={setIsAugmentModalOpen}
+          onUpdate={(newData) => updateSlot(setName, slot, newData)}
+        />
       </div>
     </TooltipProvider>
   );
