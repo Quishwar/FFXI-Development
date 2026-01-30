@@ -8,7 +8,9 @@
   "main": "dist-electron/main.js",
   "scripts": {
     "dev": "vite",
-    "build": "tsc && vite build && electron-builder",
+    "type-check": "tsc",
+    "build": "npm run type-check && npm run build:vite && electron-builder",
+    "build:vite": "vite build",
     "lint": "eslint .",
     "preview": "vite preview"
   },
