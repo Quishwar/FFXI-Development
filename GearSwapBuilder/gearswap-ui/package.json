@@ -1,7 +1,7 @@
 {
   "name": "gearswap-ui",
   "private": true,
-  "version": "1.0.2",
+  "version": "1.2.0",
   "description": "A classic FFXI-style GearSwap set builder",
   "author": "Quishwar",
   "type": "module",
