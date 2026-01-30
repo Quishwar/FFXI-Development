@@ -14,7 +14,8 @@ export default function App() {
     isAugmentModalOpen,
     closeAugmentModal,
     modalTarget,
-    updateSlot
+    updateSlot,
+    allSets
   } = useGearStore();
 
   useEffect(() => {
@@ -64,15 +65,31 @@ export default function App() {
           <LuaPreview />
         </aside>
       </div>
+      {
+        (() => {
+          if (!modalTarget) return null;
 
-      {modalTarget && (
-        <AugmentModal
-          item={modalTarget.item}
-          isOpen={isAugmentModalOpen}
-          onOpenChange={closeAugmentModal}
-          onUpdate={(newData) => updateSlot(modalTarget.setName, modalTarget.slot, newData)}
-        />
-      )}
-    </div>
+          // Get the "live" item from the store so that updates (add/remove augments)
+          // are reflected immediately without closing/reopening the modal.
+          // We also handle the case where the slot might have been cleared or changed.
+          const currentItemData = allSets[modalTarget.setName]?.[modalTarget.slot];
+
+          // If the item was removed from the set while modal was open, fallback or close
+          // For now, we'll try to maintain valid object structure
+          const liveItem = typeof currentItemData === 'string'
+            ? { name: currentItemData }
+            : (currentItemData || modalTarget.item);
+
+          return (
+            <AugmentModal
+              item={liveItem}
+              isOpen={isAugmentModalOpen}
+              onOpenChange={closeAugmentModal}
+              onUpdate={(newData) => updateSlot(modalTarget.setName, modalTarget.slot, newData)}
+            />
+          );
+        })()
+      }
+    </div >
   );
 }
