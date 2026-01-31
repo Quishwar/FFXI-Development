@@ -52,8 +52,8 @@ export const generateUpdatedLua = (
       const gearLines = formatGearLines(allSets[setName]);
       const base = baseSets[setName];
       return base
-        ? `    ${setName} = set_combine(${base}, {\n${gearLines}\n    })`
-        : `    ${setName} = {\n${gearLines}\n    }`;
+        ? `    sets.${setName} = set_combine(${base}, {\n${gearLines}\n    })`
+        : `    sets.${setName} = {\n${gearLines}\n    }`;
     }).join("\n\n");
 
     const initFuncStart = updatedLua.search(/function\s+init_gear_sets\s*\(/);
