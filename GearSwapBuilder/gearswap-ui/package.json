@@ -39,6 +39,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "cmdk": "^1.1.1",
+    "electron-updater": "^6.7.3",
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
@@ -72,10 +73,23 @@
     "appId": "com.gearswap.studio",
     "productName": "GearSwap Studio",
     "win": {
-      "target": "portable",
-      "artifactName": "GearSwapStudio-${version}.exe",
+      "target": "nsis",
+      "artifactName": "GearSwapStudio-Setup-${version}.exe",
       "icon": "public/ffxi_icon.ico"
     },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "GearSwap Studio"
+    },
+    "publish": [
+      {
+        "provider": "github",
+        "owner": "GCarman1982",
+        "repo": "Development"
+      }
+    ],
     "directories": {
       "output": "release"
     },

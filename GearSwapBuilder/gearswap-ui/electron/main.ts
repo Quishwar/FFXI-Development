@@ -1,8 +1,12 @@
 import { app, BrowserWindow } from 'electron'
+import { autoUpdater } from 'electron-updater'
 import path from 'path'
 import { fileURLToPath } from 'url'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+// Configure logging for auto-updater (optional but helpful)
+// autoUpdater.logger = console;
 
 function createWindow() {
   const win = new BrowserWindow({
@@ -24,6 +28,11 @@ function createWindow() {
     win.loadURL(process.env.VITE_DEV_SERVER_URL)
   } else {
     win.loadFile(path.join(__dirname, '../dist/index.html'))
+  }
+
+  // Check for updates once the window is created
+  if (!process.env.VITE_DEV_SERVER_URL) {
+    autoUpdater.checkForUpdatesAndNotify()
   }
 }
 
