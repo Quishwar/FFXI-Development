@@ -5,6 +5,7 @@ export interface EquippedItem {
   augments?: string[];
   rank?: number;
   path?: string;
+  isVariable?: boolean;
 }
 
 export type GearSet = Record<string, string | EquippedItem>;
@@ -37,7 +38,9 @@ export const parseLuaToSets = (luaText: string): ParseResult => {
   let match;
   while ((match = setFinder.exec(cleanLua)) !== null) {
     let path = match[1].trim();
-    if (path.startsWith('.')) path = path.substring(1);
+    // Standardize to always include 'sets.' prefix
+    if (path.startsWith('.')) path = `sets${path}`;
+    else if (!path.startsWith('sets')) path = `sets.${path}`;
 
     const startIndex = setFinder.lastIndex;
     const remainingText = cleanLua.substring(startIndex).trim();
@@ -123,7 +126,13 @@ function parseGearBlock(block: string): GearSet {
 
     const nameMatch = content.match(/name\s*=\s*(["'])(.*?)\1/);
     if (nameMatch) {
-      const item: EquippedItem = { name: nameMatch[2].trim() };
+      const nameValue = nameMatch[2].trim();
+      const item: EquippedItem = { name: nameValue };
+
+      // Heuristic: If it contains a dot and underscores but no spaces, it's likely a variable reference
+      if (nameValue.includes('.') && !nameValue.includes(' ')) {
+        item.isVariable = true;
+      }
 
       // Cleanly extract augments
       if (content.includes("augments")) {
@@ -156,6 +165,19 @@ function parseGearBlock(block: string): GearSet {
     // Skip if it's a property or already filled by a table
     if (!gear[slot] && !['name', 'path', 'augments'].includes(slot)) {
       gear[slot] = match[3].trim();
+    }
+  }
+
+  // 3. Parse Variables: slot=Variable.Name
+  const variableRegex = /([\w\d_]+)\s*=\s*([a-zA-Z_][\w\d_\.]*)/g;
+  while ((match = variableRegex.exec(block)) !== null) {
+    const slotName = match[1].toLowerCase();
+    const slot = SLOT_MAP[slotName] || slotName;
+    const value = match[2].trim();
+
+    // Only handle if this slot hasn't been filled yet and doesn't look like a keyword/value
+    if (!gear[slot] && !['name', 'path', 'augments', 'true', 'false', 'nil'].includes(value.toLowerCase())) {
+      gear[slot] = { name: value, isVariable: true };
     }
   }
 

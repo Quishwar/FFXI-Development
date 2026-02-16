@@ -2,7 +2,7 @@ import React, { useRef, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useGearStore } from "@/store/useGearStore";
-import { Download, Upload, Trash2, Swords, Search, X } from "lucide-react";
+import { Download, Upload, Trash2, Swords, Search, X, Github } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
 import { parseLuaToSets } from "@/lib/luaImporter";
@@ -126,6 +126,15 @@ export function TopNav() {
         {/* Right Side: Actions */}
         <div className="flex items-center gap-3 shrink-0">
           <ThemeToggle />
+          <Button
+            variant="ghost"
+            className="ff-interactive text-[10px] uppercase font-bold tracking-widest text-zinc-400 hover:text-white"
+            onClick={() => window.open('https://github.com/GCarman1982/Development/blob/master/GearSwapBuilder/gearswap-ui/user_manual.md', '_blank')}
+            title="User Manual"
+          >
+            <Github className="w-4 h-4 mr-2" />
+            Help
+          </Button>
           <div className="w-[1px] h-6 bg-white/10 mx-1" />
           <Input type="file" ref={fileInputRef} onChange={handleFileUpload} accept=".lua" className="hidden" />
 

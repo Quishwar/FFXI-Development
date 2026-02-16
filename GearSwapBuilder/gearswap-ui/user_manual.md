@@ -17,8 +17,9 @@ The Studio is divided into three main zones:
 - **Visual Mapping**: The preview uses syntax highlighting to help you distinguish between set names (orange/emerald), slot names (sky blue), and item names (emerald green).
 - **Final Set Review**: Before exporting, use this pane to verify that your `sets.idle.town` look exactly as intended.
 
-### Themes
-You can switch between a **Sleek Modern** theme and a **Classic FFXI** (Blue Gradient) theme using the toggle in the Top Navigation bar.
+### Themes & Help
+- **Classic Theme**: Switch between a Sleek Modern look and a classic FFXI (Blue Gradient) theme.
+- **Help Button**: If you're ever stuck, click the **Github Help** button in the Top Navigation bar to return to this manual.
 
 ---
 
@@ -49,10 +50,11 @@ If you already have a GearSwap `.lua` file, you don't have to start from scratch
 ### Browsing Sets
 Use the Sidebar to navigate between categories. Groups like `IDLE`, `ENGAGED`, and `MIDCAST` are automatically categorized for you.
 
-### Adding New Sets
-1.  Click the **"Add Set"** button at the top of the Sidebar.
-2.  Give your set a name (e.g., `sets.midcast.Cure`).
-3.  *(Optional)* Choose a **Base Set** to inherit from. This is useful if you only want to change a few pieces from a standard set.
+### Adding & Managing Variants
+The Studio now automatically simplifies your Sidebar by grouping variations of a set.
+- **Base Sets**: Root categories like `sets.midcast.RA` appear in the Sidebar.
+- **Manual Variants**: Specific versions (like `.Acc`, `.PDT`, or `.Magic`) are managed inside the **Gear Grid** via the "Manual Variants" toolbar.
+- **Add Variant**: Use the **"Add Variant"** button in the Grid View's variant toolbar to create sub-sets (e.g., adding `Acc` will create `sets.midcast.RA.Acc`).
 
 ### Resetting or Clearing Sets
 
@@ -91,7 +93,17 @@ GearSwap Studio handles the complexities of modern FFXI augments with ease.
 #### For Odyssey Items (Nyame, Sakpata, etc.):
 The Studio recognizes Odyssey gear automatically. You will see a dedicated **Odyssey Path Picker** (Paths A, B, C, or D). Selecting a path will automatically format the correct GearSwap code for you.
 
-#### For All Other Items:
+#### Lua Variables
+You can now use variables directly in your gear sets!
+- Variables like `gear.Malignance_head` or `Relic_Lanun.Legs` are detected automatically during import.
+- The UI will display these names directly, and the Exporter will preserve them without quotes, ensuring your advanced GearSwap logic stays intact.
+
+> [!WARNING]
+> **Variable Limitations**:
+> 1. **No Manual Addition**: You cannot currently add *new* variables directly through the item search. They must be present in your imported `.lua` file.
+> 2. **Loss on Change**: If you replace a variable with a standard item or clear the slot in the Studio, the variable reference is lost. It will no longer appear in your exported file.
+
+#### Manual Augments
 You can manually add augments using the search tool:
 1.  Search for a stat template (e.g., `STR+%d`).
 2.  Enter the value (e.g., `10`).
@@ -109,6 +121,9 @@ Once you're happy with your sets:
     - This allows you to do a final check of the full Lua code.
     - **You can edit this code directly!** If you need to add custom functions, comments, or tweak logic before saving, do it here.
 4.  Click **Save Code** to download the file to your computer.
+
+### Clean Code Export
+The Studio automatically simplifies your output for readability. Simple gear items with no extra augments are exported as flat strings (e.g., `waist="Grunfeld Rope"`) instead of unnecessary tables, keeping your Lua files tidy.
 
 If you imported an existing file, the Studio is smart enough to **merge** your changes back into your original file structure, preserving your logic while updating the gear sets.
 

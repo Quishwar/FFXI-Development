@@ -18,8 +18,26 @@ export function AddVariantDialog() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+        const { allSets } = useGearStore.getState();
+
+        // Find the "True Base" of the active tab to append variant to
+        const getBaseSetPath = (path: string) => {
+            const cleanPath = path.startsWith('sets.') ? path : `sets.${path}`;
+            const parts = cleanPath.split('.');
+            // parts[0] is 'sets', parts[1] is the root category (e.g. 'midcast')
+            // We want to find the shortest prefix that exists in allSets
+            // but is at least 'sets.category'
+            for (let i = 2; i <= parts.length; i++) {
+                const potentialBase = parts.slice(0, i).join('.');
+                if (allSets[potentialBase]) return potentialBase;
+            }
+            return cleanPath;
+        };
+
+        const basePath = getBaseSetPath(activeTab);
+
         if (value.trim()) {
-            const newPath = `${activeTab}.${value.trim()}`;
+            const newPath = `${basePath}.${value.trim()}`;
             addSet(newPath);
             setActiveTab(newPath);
             handleClose();
@@ -27,18 +45,18 @@ export function AddVariantDialog() {
     };
 
     return (
-        <Dialog.Root 
-            open={open} 
+        <Dialog.Root
+            open={open}
             onOpenChange={(isOpen) => {
                 if (!isOpen) setValue(""); // Clears on click-away or ESC
                 setOpen(isOpen);
             }}
         >
             <Dialog.Trigger asChild>
-                <Button className="ff-window ff-interactive group flex items-center justify-center gap-2 w-full h-14 border-dashed border-white/20 bg-transparent transition-all mt-4 hover:border-brand/50 px-4 classic:rounded-none">
-                    <Plus className="w-4 h-4 text-operator group-hover:text-brand transition-colors" />
+                <Button className="ff-window ff-interactive group flex items-center justify-center gap-2 px-4 py-2 h-auto border-dashed border-white/20 bg-transparent transition-all hover:border-brand/50 classic:rounded-none">
+                    <Plus className="w-3 h-3 text-operator group-hover:text-brand transition-colors" />
                     <span className="text-[10px] font-bold text-operator uppercase tracking-[0.2em] group-hover:text-brand transition-colors">
-                        Add Custom Variant
+                        Add Variant
                     </span>
                 </Button>
             </Dialog.Trigger>
@@ -52,7 +70,7 @@ export function AddVariantDialog() {
                     )}>
                         <div className="flex justify-between items-center border-b border-white/10 pb-3">
                             <Dialog.Title className="text-[10px] font-bold text-white [[data-theme='ffxi']_&]:text-white uppercase tracking-[0.2em]">
-                                New <span className="text-brand">{activeTab.replace('sets.', '')}</span> Variant
+                                New Variant
                             </Dialog.Title>
 
                             {/* ACCESSIBILITY FIX: Hidden Description */}
@@ -74,7 +92,7 @@ export function AddVariantDialog() {
                                     autoFocus
                                     className={cn(
                                         "w-full bg-black/40 border border-white/10 p-3 font-mono text-sm focus:border-brand/50 outline-none transition-all placeholder:text-white/10",
-                                        "text-white [[data-theme='ffxi']_&]:text-white", 
+                                        "text-white [[data-theme='ffxi']_&]:text-white",
                                         "classic:rounded-none dark:rounded-lg"
                                     )}
                                     placeholder="e.g. DT, Acc, Magic"
@@ -100,7 +118,7 @@ export function AddVariantDialog() {
                                     type="submit"
                                     className={cn(
                                         "ff-interactive px-8 bg-brand font-bold text-[10px] uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(var(--brand-rgb),0.4)] border-none",
-                                        "[[data-theme='ffxi']_&]:!text-black !text-white", 
+                                        "[[data-theme='ffxi']_&]:!text-black !text-white",
                                         "classic:rounded-none dark:rounded-lg"
                                     )}
                                 >

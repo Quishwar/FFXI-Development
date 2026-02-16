@@ -8,6 +8,7 @@ export type EquippedItem = {
   augments?: string[];
   rank?: number;
   path?: string;
+  isVariable?: boolean;
 };
 
 export type GearSet = Record<string, string | EquippedItem>;

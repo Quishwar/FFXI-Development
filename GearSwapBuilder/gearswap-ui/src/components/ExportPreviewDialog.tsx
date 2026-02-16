@@ -1,3 +1,4 @@
+import { useGearStore } from "@/store/useGearStore";
 import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -17,8 +18,11 @@ export function ExportPreviewDialog({
     initialCode,
     suggestedFileName
 }: ExportPreviewDialogProps) {
+    const { theme } = useGearStore();
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [code, setCode] = useState(initialCode);
+
+    const buttonBg = theme === 'ffxi' ? 'bg-[#9c7b00] hover:bg-[#856900]' : 'bg-brand hover:bg-brand/90';
 
     // Reset code and scroll to top when dialog opens
     useEffect(() => {
@@ -74,7 +78,7 @@ export function ExportPreviewDialog({
                         </Button>
                         <Button
                             onClick={handleSave}
-                            className="bg-brand hover:bg-brand/90 text-white font-bold"
+                            className={`${buttonBg} text-white font-bold`}
                         >
                             <Download className="w-4 h-4 mr-2" />
                             Save Code

@@ -22,7 +22,7 @@ export function Sidebar() {
     const filteredSets = useMemo(() => {
         const query = (searchTerm || "").toLowerCase();
         return Object.fromEntries(
-            Object.entries(allSets).filter(([path]) => 
+            Object.entries(allSets).filter(([path]) =>
                 path.toLowerCase().includes(query)
             )
         );
@@ -43,7 +43,7 @@ export function Sidebar() {
             // Standardize path for root detection
             const cleanPath = path.startsWith('sets.') ? path.substring(5) : path;
             const root = cleanPath.split(/[.\[]/)[0];
-            
+
             if (!categories[root] && root !== "") {
                 const config = iconMap[root] || { icon: Folder, color: 'text-zinc-500' };
                 categories[root] = { label: root.toUpperCase(), ...config };
@@ -64,7 +64,7 @@ export function Sidebar() {
         <aside className="w-[340px] h-full border-r border-white/10 flex flex-col shrink-0 overflow-hidden
             bg-ui-window 
             [[data-theme='ffxi']_&]:bg-[linear-gradient(180deg,#000080_0%,#000033_100%)]">
-            
+
             <div className="sticky top-0 z-20 px-5 pt-5 pb-4 border-b border-black/60 shadow-lg 
                 bg-ui-window 
                 [[data-theme='ffxi']_&]:bg-transparent [[data-theme='ffxi']_&]:shadow-none">
@@ -101,35 +101,53 @@ export function Sidebar() {
 
                             {isExpanded && (
                                 <div className="mt-1 space-y-1 border-l-2 border-white/5 ml-4 pl-3">
-                                    {setsInCategory.sort().map(path => {
-                                        const isActive = activeTab === path;
-                                        // Display name strips the 'sets.' but the key remains 'sets.path'
-                                        const displayName = path.startsWith('sets.') ? path.substring(5) : path;
+                                    {(() => {
+                                        // 1. Identify "Base Sets" in this category
+                                        // A set is a variant if its parent path is also in allSets
+                                        const setPaths = setsInCategory.sort();
+                                        const baseSetsList = setPaths.filter(path => {
+                                            const parts = path.split('.');
+                                            // Start checking from 'sets.Category' upwards
+                                            // sets.midcast.RA -> i=2 -> sets.midcast
+                                            for (let i = 2; i < parts.length; i++) {
+                                                const parentPath = parts.slice(0, i).join('.');
+                                                if (allSets[parentPath]) return false;
+                                            }
+                                            return true;
+                                        });
 
-                                        return (
-                                            <Button
-                                                key={path}
-                                                variant="ghost"
-                                                onClick={() => setActiveTab(path)}
-                                                className={`ff-interactive w-full justify-start h-auto py-2.5 px-4 transition-all relative rounded-none border-2
-                                                    ${isActive 
-                                                        ? "ff-window border-brand bg-white/[0.08] text-white" 
-                                                        : "border-transparent text-white/50 hover:text-white hover:bg-white/[0.03]"
-                                                    }
-                                                `}
-                                            >
-                                                <Circle className={`w-2 h-2 mr-3 transition-all ${
-                                                    isActive 
-                                                    ? 'text-brand drop-shadow-[0_0_5px_rgba(var(--brand-rgb),0.8)]' 
-                                                    : 'text-white/10'
-                                                }`} />
-                                                
-                                                <span className={`text-[11px] font-mono truncate tracking-tight uppercase ${isActive ? 'font-black' : 'font-medium'}`}>
-                                                    {displayName}
-                                                </span>
-                                            </Button>
-                                        );
-                                    })}
+                                        return baseSetsList.map(path => {
+                                            // Determine if this base set or any of its variants is active
+                                            const isBaseActive = activeTab === path;
+                                            const isVariantActive = activeTab.startsWith(`${path}.`);
+                                            const isActive = isBaseActive || isVariantActive;
+
+                                            const displayName = path.startsWith('sets.') ? path.substring(5) : path;
+
+                                            return (
+                                                <Button
+                                                    key={path}
+                                                    variant="ghost"
+                                                    onClick={() => setActiveTab(path)}
+                                                    className={`ff-interactive w-full justify-start h-auto py-2.5 px-4 transition-all relative rounded-none border-2
+                                                        ${isActive
+                                                            ? "ff-window border-brand bg-white/[0.08] text-white"
+                                                            : "border-transparent text-white/50 hover:text-white hover:bg-white/[0.03]"
+                                                        }
+                                                    `}
+                                                >
+                                                    <Circle className={`w-2 h-2 mr-3 transition-all ${isActive
+                                                        ? 'text-brand drop-shadow-[0_0_5px_rgba(var(--brand-rgb),0.8)]'
+                                                        : 'text-white/10'
+                                                        }`} />
+
+                                                    <span className={`text-[11px] font-mono truncate tracking-tight uppercase ${isActive ? 'font-black' : 'font-medium'}`}>
+                                                        {displayName}
+                                                    </span>
+                                                </Button>
+                                            );
+                                        });
+                                    })()}
                                 </div>
                             )}
                         </div>

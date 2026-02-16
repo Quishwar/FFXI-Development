@@ -111,6 +111,13 @@ const formatGearLines = (gear: GearSet): string => {
 
 const itemToLua = (item: string | EquippedItem): string => {
   if (typeof item === 'string') return `"${item}"`;
+  if (item.isVariable) return item.name;
+
+  const hasExtras = (item.augments && item.augments.length > 0) || item.rank || item.path;
+  if (!hasExtras) {
+    return `"${item.name}"`;
+  }
+
   const parts = [`name="${item.name}"`];
   if (item.augments?.length) {
     const cleanAugs = item.augments.filter(a => a.trim() !== "");

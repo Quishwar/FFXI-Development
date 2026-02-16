@@ -20,13 +20,13 @@ export function GearGrid() {
   // Logic to parse the path: sets.Primary.SubCategory
   const renderFormattedPath = (path: string) => {
     // Expected input: "midcast['Dark Magic']" or "idle.town"
-    const parts = path.split('.'); 
-    
+    const parts = path.split('.');
+
     return (
       <span className="flex items-center">
         {/* 1. The Primary Category (e.g., precast, midcast, idle) - Always Orange */}
         <span className="text-lua-orange">{parts[0]}</span>
-        
+
         {/* 2. All Sub-Categories (e.g., ['Dark Magic'], town, weapon) - Always Emerald */}
         {parts.slice(1).map((part, i) => (
           <span key={i} className="flex items-center">
@@ -41,7 +41,7 @@ export function GearGrid() {
   return (
     <div className="flex-1 w-full overflow-y-auto custom-scrollbar bg-ui-window">
       <div className="flex flex-col gap-8 py-10 max-w-5xl mx-auto px-6">
-        
+
         {/* Header */}
         <div className="flex items-center justify-between border-b border-white/10 pb-6">
           <div>
@@ -86,24 +86,69 @@ export function GearGrid() {
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-8 bg-black/20 border border-white/10 shadow-2xl ff-window !rounded-none">
             {SLOTS.map(slot => (
-              <SlotPicker 
-                key={`${activeTab}-${slot}`} 
-                slot={slot} 
-                setName={activeTab} 
+              <SlotPicker
+                key={`${activeTab}-${slot}`}
+                slot={slot}
+                setName={activeTab}
               />
             ))}
           </div>
         </div>
 
         {/* Global Variants Section */}
-        <div className="mt-8 border-t border-white/10 pt-8 px-4"> {/* Added px-4 here */}
-  <h3 className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-4">
-    Manual Variants
-  </h3>
-  <div className="relative"> {/* Wrap in relative to manage z-index if needed */}
-     <AddVariantDialog />
-  </div>
-</div>
+        <div className="mt-8 border-t border-white/10 pt-8 px-4">
+          <h3 className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-4">
+            Manual Variants
+          </h3>
+          <div className="flex flex-wrap gap-2 mb-4">
+            {(() => {
+              const { allSets, setActiveTab } = useGearStore();
+
+              // 1. Find the "True Base" of the active tab
+              const getBaseSetPath = (path: string) => {
+                const parts = path.split('.');
+                // Check prefixes to find the shortest path that exists in allSets
+                // This handles both "sets.midcast.RA.Acc" and "midcast.RA.Acc"
+                for (let i = 1; i <= parts.length; i++) {
+                  const potentialBase = parts.slice(0, i).join('.');
+                  if (allSets[potentialBase]) return potentialBase;
+                }
+                return path;
+              };
+
+              const basePath = getBaseSetPath(activeTab);
+
+              // 2. Find all variants (including the base itself)
+              const variants = Object.keys(allSets).filter(path =>
+                path === basePath || path.startsWith(`${basePath}.`)
+              ).sort();
+
+              return variants.map(path => {
+                const isActive = activeTab === path;
+                const variantName = path === basePath
+                  ? "Base"
+                  : path.replace(`${basePath}.`, "");
+
+                return (
+                  <Button
+                    key={path}
+                    variant="ghost"
+                    onClick={() => setActiveTab(path)}
+                    className={`ff-interactive px-4 py-2 h-auto text-[10px] font-bold uppercase tracking-widest border-2 transition-all !rounded-none
+                      ${isActive
+                        ? "ff-window border-brand bg-white/[0.08] text-white"
+                        : "border-white/10 text-white/40 hover:text-white hover:border-white/30"
+                      }
+                    `}
+                  >
+                    {variantName}
+                  </Button>
+                );
+              });
+            })()}
+            <AddVariantDialog />
+          </div>
+        </div>
 
         <DeleteConfirmDialog
           open={!!deleteTarget}
