@@ -1,5 +1,7 @@
 import React from "react";
 import { useGearStore, EquippedItem } from "../store/useGearStore";
+import { useUIStore } from "../store/useUIStore";
+import { parseGearPath } from "@/lib/utils";
 
 const SLOT_MAP: Record<string, string> = {
   main: "main", sub: "sub", range: "range", ammo: "ammo",
@@ -16,9 +18,18 @@ const SLOT_ORDER = [
 ];
 
 export function LuaPreview() {
-  const { allSets, activeTab, theme } = useGearStore();
+  const { allSets, activeTab } = useGearStore();
+  const { theme } = useUIStore();
 
-  const slotColor = theme === 'ffxi' ? 'text-white' : 'text-sky-400';
+  const isLight = theme === 'light';
+  const slotColor = theme === 'ffxi' ? 'text-white' : isLight ? 'text-blue-700' : 'text-sky-400';
+  const cKeyword = isLight ? 'text-amber-700' : 'text-amber-500';
+  const cVariant = isLight ? 'text-emerald-700' : 'text-emerald-500';
+  const cString = isLight ? 'text-emerald-700' : 'text-emerald-400';
+  const cVar = isLight ? 'text-orange-700' : 'text-amber-300';
+  const cPunct = isLight ? 'text-slate-500' : 'text-zinc-400';
+  const cProp = isLight ? 'text-blue-700' : 'text-sky-300';
+  const cArray = isLight ? 'text-emerald-800' : 'text-emerald-200';
 
   const visibleSets = Object.entries(allSets).filter(([name]) => {
     return name === activeTab || name.startsWith(`${activeTab}.`);
@@ -26,24 +37,17 @@ export function LuaPreview() {
 
   return (
     <div className="flex-1 w-full h-full p-6 font-mono text-[13px] overflow-auto custom-scrollbar border-l border-white/10
-                    bg-[#0a0a0c] [[data-theme='ffxi']_&]:bg-[linear-gradient(180deg,#000080_0%,#000033_100%)]">
+                    bg-[#0a0a0c] light:bg-[#F8FAFC] ffxi:bg-[linear-gradient(180deg,#000080_0%,#000033_100%)]">
 
       {visibleSets.map(([setName, gear]) => {
-        // 1. Strip 'sets.' from the start so we only work with the actual path
-        const pathOnly = setName.startsWith('sets.') ? setName.substring(5) : setName;
-
-        // 2. Break the path into the first real word (base) and the rest (variant)
-        // e.g. "precast.WS" -> base: "precast", variant: ".WS"
-        const parts = pathOnly.split('.');
-        const base = parts[0];
-        const variant = parts.length > 1 ? `.${parts.slice(1).join('.')}` : "";
+        const { base, variant } = parseGearPath(setName);
 
         return (
           <div key={setName} className="mb-8 select-all leading-normal">
-            <div className="text-zinc-400">
+            <div className={cPunct}>
               {/* Always start with 'sets.' once, then add the components */}
-              sets.<span className="text-amber-500">{base}</span>
-              <span className="text-emerald-500">{variant}</span> = {" {"}
+              sets.<span className={cKeyword}>{base}</span>
+              <span className={cVariant}>{variant}</span> = {" {"}
             </div>
 
             {SLOT_ORDER.map((slotKey) => {
@@ -56,9 +60,9 @@ export function LuaPreview() {
                 return (
                   <div key={slotKey} className="pl-4 whitespace-nowrap">
                     <span className={slotColor}>{gearswapSlotName}</span>
-                    <span className="text-zinc-400">="</span>
-                    <span className="text-emerald-400">{itemData}</span>
-                    <span className="text-zinc-400">",</span>
+                    <span className={cPunct}>="</span>
+                    <span className={cString}>{itemData}</span>
+                    <span className={cPunct}>",</span>
                   </div>
                 );
               }
@@ -68,9 +72,9 @@ export function LuaPreview() {
                 return (
                   <div key={slotKey} className="pl-4 whitespace-nowrap">
                     <span className={slotColor}>{gearswapSlotName}</span>
-                    <span className="text-zinc-400">=</span>
-                    <span className="text-amber-300">{item.name}</span>
-                    <span className="text-zinc-400">,</span>
+                    <span className={cPunct}>=</span>
+                    <span className={cVar}>{item.name}</span>
+                    <span className={cPunct}>,</span>
                   </div>
                 );
               }
@@ -84,9 +88,9 @@ export function LuaPreview() {
                 return (
                   <div key={slotKey} className="pl-4 whitespace-nowrap">
                     <span className={slotColor}>{gearswapSlotName}</span>
-                    <span className="text-zinc-400">="</span>
-                    <span className="text-emerald-400">{item.name}</span>
-                    <span className="text-zinc-400">",</span>
+                    <span className={cPunct}>="</span>
+                    <span className={cString}>{item.name}</span>
+                    <span className={cPunct}>",</span>
                   </div>
                 );
               }
@@ -94,32 +98,32 @@ export function LuaPreview() {
               return (
                 <div key={slotKey} className="pl-4 whitespace-nowrap">
                   <span className={slotColor}>{gearswapSlotName}</span>
-                  <span className="text-zinc-400">={"{ "}</span>
-                  <span className="text-sky-300">name</span>
-                  <span className="text-zinc-400">="</span>
-                  <span className="text-emerald-400">{item.name}</span>
-                  <span className="text-zinc-400">", </span>
+                  <span className={cPunct}>={"{"} </span>
+                  <span className={cProp}>name</span>
+                  <span className={cPunct}>="</span>
+                  <span className={cString}>{item.name}</span>
+                  <span className={cPunct}>", </span>
 
                   {displayAugs.length > 0 && (
                     <>
-                      <span className="text-sky-300">augments</span>
-                      <span className="text-zinc-400">={"{"}</span>
-                      <span className="text-emerald-200">
+                      <span className={cProp}>augments</span>
+                      <span className={cPunct}>={"{"}</span>
+                      <span className={cArray}>
                         {displayAugs.map((a, i) => (
                           <React.Fragment key={i}>
                             '{a.trim()}'{i < displayAugs.length - 1 ? "," : ""}
                           </React.Fragment>
                         ))}
                       </span>
-                      <span className="text-zinc-400">{"}"}</span>
+                      <span className={cPunct}>{"}"}</span>
                     </>
                   )}
-                  <span className="text-zinc-400">{"},"}</span>
+                  <span className={cPunct}>{"},"}</span>
                 </div>
               );
             })}
 
-            <div className="text-zinc-400">{"}"}</div>
+            <div className={cPunct}>{"}"}</div>
           </div>
         );
       })}

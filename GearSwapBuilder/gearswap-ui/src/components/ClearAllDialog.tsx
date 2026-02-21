@@ -16,21 +16,21 @@ export function ClearAllDialog() {
           <span className="text-[10px] font-bold uppercase tracking-wider">Clear All</span>
         </button>
       </Dialog.Trigger>
-      
+
       <Dialog.Portal>
         <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 animate-in fade-in duration-200" />
-        <Dialog.Content className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[400px] ff-window bg-panel border border-red-900/50 p-6 shadow-2xl z-50">
-          
+        <Dialog.Content className="fixed left-[50%] top-[50%] translate-x-[-50%] translate-y-[-50%] w-[400px] ff-window bg-ui-window border border-red-900/50 p-6 shadow-2xl z-50">
+
           <div className="flex items-start gap-4">
             <div className="p-3 bg-red-500/10 rounded-full">
               <AlertTriangle className="w-6 h-6 text-red-500" />
             </div>
             <div className="flex-1">
-              <Dialog.Title className="text-lg font-black uppercase tracking-tighter text-zinc-100">
+              <Dialog.Title className="text-lg font-black uppercase tracking-tighter text-zinc-100 light:text-slate-800">
                 Purge All Sets?
               </Dialog.Title>
-              <Dialog.Description className="mt-2 text-sm text-zinc-400 leading-relaxed">
-                This will delete <span className="text-red-400 font-bold">every gear set</span> currently in your studio. 
+              <Dialog.Description className="mt-2 text-sm text-zinc-400 light:text-slate-600 leading-relaxed">
+                This will delete <span className="text-red-400 font-bold">every gear set</span> currently in your studio.
                 Unless you have a backup of your .lua file, this action is permanent.
               </Dialog.Description>
             </div>
@@ -38,7 +38,7 @@ export function ClearAllDialog() {
 
           <div className="flex justify-end gap-3 mt-8">
             <Dialog.Close asChild>
-              <button className="ff-interactive px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-300 transition-colors">
+              <button className="ff-interactive px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-zinc-500 hover:text-zinc-300 light:text-slate-500 light:hover:text-black transition-colors">
                 Cancel
               </button>
             </Dialog.Close>
@@ -53,7 +53,7 @@ export function ClearAllDialog() {
           </div>
 
           <Dialog.Close asChild>
-            <Button className="absolute top-4 right-4 text-zinc-600 hover:text-zinc-400">
+            <Button variant="ghost" className="absolute top-4 right-4 h-6 w-6 p-0 text-zinc-600 hover:text-zinc-400 light:text-slate-400 light:hover:text-black">
               <X size={16} />
             </Button>
           </Dialog.Close>

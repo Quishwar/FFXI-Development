@@ -69,7 +69,7 @@ export function AddVariantDialog() {
                         "classic:rounded-none dark:rounded-2xl"
                     )}>
                         <div className="flex justify-between items-center border-b border-white/10 pb-3">
-                            <Dialog.Title className="text-[10px] font-bold text-white [[data-theme='ffxi']_&]:text-white uppercase tracking-[0.2em]">
+                            <Dialog.Title className="text-[10px] font-bold text-white ffxi:text-white uppercase tracking-[0.2em]">
                                 New Variant
                             </Dialog.Title>
 
@@ -85,14 +85,14 @@ export function AddVariantDialog() {
 
                         <form onSubmit={handleSubmit} className="space-y-6 pt-2">
                             <div className="space-y-3">
-                                <label className="text-[9px] uppercase tracking-widest text-white/40 [[data-theme='ffxi']_&]:text-white/60 font-bold">
+                                <label className="text-[9px] uppercase tracking-widest text-white/40 ffxi:text-white/60 font-bold">
                                     Variant Name (Suffix)
                                 </label>
                                 <input
                                     autoFocus
                                     className={cn(
                                         "w-full bg-black/40 border border-white/10 p-3 font-mono text-sm focus:border-brand/50 outline-none transition-all placeholder:text-white/10",
-                                        "text-white [[data-theme='ffxi']_&]:text-white",
+                                        "text-white ffxi:text-white",
                                         "classic:rounded-none dark:rounded-lg"
                                     )}
                                     placeholder="e.g. DT, Acc, Magic"
@@ -118,7 +118,7 @@ export function AddVariantDialog() {
                                     type="submit"
                                     className={cn(
                                         "ff-interactive px-8 bg-brand font-bold text-[10px] uppercase tracking-widest transition-all shadow-[0_0_15px_rgba(var(--brand-rgb),0.4)] border-none",
-                                        "[[data-theme='ffxi']_&]:!text-black !text-white",
+                                        "ffxi:!text-black !text-white",
                                         "classic:rounded-none dark:rounded-lg"
                                     )}
                                 >

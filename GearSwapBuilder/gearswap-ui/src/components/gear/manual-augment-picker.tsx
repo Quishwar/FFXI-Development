@@ -70,7 +70,7 @@ function SortableAugment({ id, value, onRemove }: { id: string; value: string; o
     <div
       ref={setNodeRef}
       style={style}
-      className={`flex items-center gap-1 bg-brand/10 border border-brand/30 px-2 py-1 text-[11px] text-brand font-bold touch-none transition-colors ${isDragging ? "opacity-50 border-brand shadow-lg bg-brand/20" : ""
+      className={`flex items-center gap-1 bg-brand/10 border border-brand/30 px-2 py-1 text-[11px] text-brand font-bold touch-none transition-all duration-200 active:scale-95 ${isDragging ? "opacity-50 border-brand shadow-lg bg-brand/20" : ""
         }`}
     >
       <div {...attributes} {...listeners} className="cursor-grab active:cursor-grabbing hover:text-white/80 mr-1">
@@ -157,7 +157,7 @@ export function ManualAugmentPicker({ currentAugments, onUpdate }: ManualAugment
 
   return (
     <div className="space-y-4">
-      <Label className="text-[10px] font-black uppercase text-white/40 tracking-widest">
+      <Label className="text-[10px] font-black uppercase text-white/40 light:text-slate-500 tracking-widest">
         Manual Augments
       </Label>
 
@@ -183,14 +183,14 @@ export function ManualAugmentPicker({ currentAugments, onUpdate }: ManualAugment
           <PopoverTrigger asChild>
             <Button
               variant="outline"
-              className="flex-1 justify-between ff-interactive !rounded-none border-white/10 text-xs text-left"
+              className="flex-1 justify-between ff-interactive !rounded-none border-white/10 text-xs text-left active:scale-[0.98] transition-all duration-200"
             >
               <span className="truncate">{selectedStat || "Select Stat..."}</span>
               <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
             </Button>
           </PopoverTrigger>
           <PopoverContent
-            className="w-[300px] p-0 ff-window !rounded-none border-white/10 bg-zinc-950 z-[100]"
+            className="w-[300px] p-0 ff-window !rounded-none border-white/10 bg-ui-window shadow-xl z-[100]"
             onOpenAutoFocus={(e) => e.preventDefault()}
           >
             <Command className="bg-transparent flex flex-col h-[350px]">
@@ -203,7 +203,7 @@ export function ManualAugmentPicker({ currentAugments, onUpdate }: ManualAugment
                 onWheel={(e) => e.stopPropagation()}
               >
                 <CommandList className="max-h-none overflow-visible">
-                  <CommandEmpty className="p-4 text-[11px] text-white/40">No stat found.</CommandEmpty>
+                  <CommandEmpty className="p-4 text-[11px] text-white/40 light:text-slate-500">No stat found.</CommandEmpty>
                   <CommandGroup>
                     {ALL_STATS.map((stat, index) => (
                       <CommandItem
@@ -234,7 +234,7 @@ export function ManualAugmentPicker({ currentAugments, onUpdate }: ManualAugment
 
         <Button
           onClick={addAugment}
-          className="bg-lua-green text-black hover:bg-lua-green/80 !rounded-none px-3 font-bold"
+          className="bg-lua-green text-black hover:bg-lua-green/80 active:scale-95 transition-all duration-200 !rounded-none px-3 font-bold"
         >
           <Plus size={16} />
         </Button>

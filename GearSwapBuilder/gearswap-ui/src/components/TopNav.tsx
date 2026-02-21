@@ -86,7 +86,7 @@ export function TopNav() {
             )}
           </div>
           <div className="flex flex-col">
-            <h1 className="app-title text-sm leading-none">
+            <h1 className="app-title font-russo text-sm leading-none">
               GearSwap <span className="text-white">Studio</span>
             </h1>
             {characterName ? (
@@ -103,13 +103,13 @@ export function TopNav() {
 
         {/* Center: Search Input */}
         <div className="flex-1 max-w-xl relative group">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 z-10" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-500 light:text-slate-700 z-10" />
           <Input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Search sets or items..."
-            className="w-full bg-white/5 border-white/10 pl-10 pr-10 text-xs text-white focus-visible:ring-1 focus-visible:ring-brand h-9 ff-window !rounded-none"
+            className="w-full bg-white/5 light:bg-slate-100 border-white/10 light:border-slate-300 pl-10 pr-10 text-xs text-white light:text-slate-800 placeholder:text-white/50 light:placeholder:text-slate-500 focus-visible:ring-1 focus-visible:ring-white/20 light:focus-visible:ring-slate-300 h-9 ff-window !rounded-xl transition-colors"
           />
           {searchTerm && (
             <Button

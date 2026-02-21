@@ -1,4 +1,4 @@
-import { useGearStore } from "@/store/useGearStore";
+import { useUIStore } from "@/store/useUIStore";
 import { useState, useEffect, useRef } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -18,7 +18,7 @@ export function ExportPreviewDialog({
     initialCode,
     suggestedFileName
 }: ExportPreviewDialogProps) {
-    const { theme } = useGearStore();
+    const { theme } = useUIStore();
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const [code, setCode] = useState(initialCode);
 
@@ -46,7 +46,7 @@ export function ExportPreviewDialog({
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="fixed z-[200] flex flex-col gap-0 w-full bg-[#0a0a0c] p-0 shadow-2xl overflow-hidden
+            <DialogContent className="fixed z-[200] flex flex-col gap-0 w-full bg-ui-window p-0 shadow-2xl overflow-hidden
             bottom-0 top-auto translate-y-0 left-0 right-0 translate-x-0 mx-auto
             h-[85vh] rounded-t-xl border-t border-x border-white/10
             sm:bottom-6 sm:h-[85vh] sm:max-w-4xl sm:rounded-xl sm:border">
@@ -61,7 +61,7 @@ export function ExportPreviewDialog({
                                 ref={textareaRef}
                                 value={code}
                                 onChange={(e) => setCode(e.target.value)}
-                                className="w-full h-full resize-none bg-[#111] p-4 font-mono text-xs text-emerald-400 focus:outline-none custom-scrollbar leading-relaxed"
+                                className="w-full h-full resize-none bg-[#111] light:bg-white p-4 font-mono text-xs text-emerald-400 light:text-emerald-700 focus:outline-none custom-scrollbar leading-relaxed"
                                 spellCheck={false}
                                 style={{ tabSize: 4 }}
                             />
@@ -72,13 +72,13 @@ export function ExportPreviewDialog({
                         <Button
                             variant="ghost"
                             onClick={() => onOpenChange(false)}
-                            className="hover:bg-white/5 hover:text-white text-zinc-400"
+                            className="hover:bg-white/5 hover:text-white text-zinc-400 light:text-slate-600 light:hover:text-black"
                         >
                             Cancel
                         </Button>
                         <Button
                             onClick={handleSave}
-                            className={`${buttonBg} text-white font-bold`}
+                            className={`${buttonBg} text-white light:!text-[#ffffff] font-bold`}
                         >
                             <Download className="w-4 h-4 mr-2" />
                             Save Code

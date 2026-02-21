@@ -4,12 +4,14 @@ import { Command, CommandInput, CommandEmpty, CommandGroup, CommandItem, Command
 import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger, ContextMenuSeparator } from "@/components/ui/context-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useGearStore, EquippedItem } from "@/store/useGearStore";
+import { useUIStore } from "@/store/useUIStore";
 import { cn } from "@/lib/utils";
 import { Edit3, Trash2, Copy, Loader2 } from "lucide-react";
 import { useItemSearch } from "@/lib/hooks/useItemSearch";
 
 export function SlotPicker({ slot, setName }: { slot: string; setName: string }) {
-  const { allSets, updateSlot, isLoadingItems, openAugmentModal } = useGearStore();
+  const { allSets, updateSlot, isLoadingItems } = useGearStore();
+  const { openAugmentModal } = useUIStore();
   const [open, setOpen] = useState(false);
 
   const { search, setSearch, filteredItems } = useItemSearch(slot);
@@ -38,7 +40,7 @@ export function SlotPicker({ slot, setName }: { slot: string; setName: string })
                 <TooltipTrigger asChild>
                   <PopoverTrigger asChild>
                     <div className={cn(
-                      "ff-window ff-interactive flex flex-col p-3 min-h-[85px] h-full cursor-pointer transition-all relative !rounded-none border",
+                      "ff-window ff-interactive flex flex-col p-3 min-h-[85px] h-full cursor-pointer transition-all duration-200 active:scale-95 relative !rounded-none border",
                       isEquipped
                         ? "border-brand"
                         : "border-white/5 bg-black/40 hover:bg-white/5"
@@ -53,7 +55,7 @@ export function SlotPicker({ slot, setName }: { slot: string; setName: string })
                         </span>
 
                         {hasAugments && (
-                          <span className="text-[8px] bg-lua-green/20 text-lua-green px-1.5 py-0.5 border border-lua-green/30 font-bold rounded-[2px] shadow-[0_0_5px_rgba(34,197,94,0.3)]">
+                          <span className="text-[8px] bg-lua-green/20 ffxi:bg-[#FFD700]/20 text-lua-green ffxi:text-[#FFD700] px-1.5 py-0.5 border border-lua-green/30 ffxi:border-[#FFD700]/30 font-bold rounded-[2px] shadow-[0_0_5px_rgba(34,197,94,0.3)] ffxi:shadow-[0_0_5px_rgba(255,215,0,0.3)]">
                             AUG
                           </span>
                         )}
@@ -141,12 +143,12 @@ export function SlotPicker({ slot, setName }: { slot: string; setName: string })
             </Popover>
           </ContextMenuTrigger>
 
-          <ContextMenuContent className="ff-window bg-zinc-950 border-white/10 min-w-[180px] !rounded-none p-1 shadow-3xl">
-            <div className="px-2 py-1.5 text-[10px] font-black text-white/30 uppercase tracking-tighter">
+          <ContextMenuContent className="ff-window bg-zinc-950 light:!bg-[#F8FAFC] border-white/10 light:border-slate-300 min-w-[180px] !rounded-none p-1 shadow-3xl">
+            <div className="px-2 py-1.5 text-[10px] font-black text-white/30 light:text-slate-400 uppercase tracking-tighter">
               Item Options
             </div>
             <ContextMenuItem
-              className="text-xs text-white/80 focus:bg-brand/30 focus:text-white cursor-pointer gap-2 py-2"
+              className="text-xs text-white/80 light:text-slate-700 focus:bg-brand/30 focus:text-white light:focus:text-black cursor-pointer gap-2 py-2"
               onSelect={() => openAugmentModal(setName, slot, typedItem || { name: displayName })}
             >
               <Edit3 size={14} className="text-lua-green" />
@@ -154,17 +156,17 @@ export function SlotPicker({ slot, setName }: { slot: string; setName: string })
             </ContextMenuItem>
 
             <ContextMenuItem
-              className="text-xs text-white/80 focus:bg-brand/30 focus:text-white cursor-pointer gap-2 py-2"
+              className="text-xs text-white/80 light:text-slate-700 focus:bg-brand/30 focus:text-white light:focus:text-black cursor-pointer gap-2 py-2"
               onSelect={() => navigator.clipboard.writeText(displayName)}
             >
               <Copy size={14} className="text-sky-400" />
               Copy Name
             </ContextMenuItem>
 
-            <ContextMenuSeparator className="bg-white/10 my-1" />
+            <ContextMenuSeparator className="bg-white/10 light:bg-slate-200 my-1" />
 
             <ContextMenuItem
-              className="text-xs text-red-400 focus:bg-red-500/20 focus:text-red-400 cursor-pointer gap-2 py-2"
+              className="text-xs text-red-400 light:text-red-500 focus:bg-red-500/20 light:focus:bg-red-100 focus:text-red-400 light:focus:text-red-700 cursor-pointer gap-2 py-2"
               onSelect={() => updateSlot(setName, slot, "")}
             >
               <Trash2 size={14} />

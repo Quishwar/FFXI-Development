@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Trash2, Eraser, Layers } from "lucide-react";
 import { AddVariantDialog } from "./AddVariantDialog";
 import { DeleteConfirmDialog } from "./DeleteConfirmDialog";
+import { parseGearPath } from "@/lib/utils";
 
 export function GearGrid() {
   const { activeTab, removeSet, clearSet } = useGearStore();
@@ -17,23 +18,13 @@ export function GearGrid() {
     "back", "waist", "legs", "feet"
   ];
 
-  // Logic to parse the path: sets.Primary.SubCategory
   const renderFormattedPath = (path: string) => {
-    // Expected input: "midcast['Dark Magic']" or "idle.town"
-    const parts = path.split('.');
+    const { base, variant } = parseGearPath(path);
 
     return (
       <span className="flex items-center">
-        {/* 1. The Primary Category (e.g., precast, midcast, idle) - Always Orange */}
-        <span className="text-lua-orange">{parts[0]}</span>
-
-        {/* 2. All Sub-Categories (e.g., ['Dark Magic'], town, weapon) - Always Emerald */}
-        {parts.slice(1).map((part, i) => (
-          <span key={i} className="flex items-center">
-            <span className="text-white/40">.</span>
-            <span className="text-emerald-500">{part}</span>
-          </span>
-        ))}
+        <span className="text-lua-orange light:text-orange-700">{base}</span>
+        {variant && <span className="text-emerald-500 light:text-emerald-700">{variant}</span>}
       </span>
     );
   };
@@ -45,7 +36,7 @@ export function GearGrid() {
         {/* Header */}
         <div className="flex items-center justify-between border-b border-white/10 pb-6">
           <div>
-            <h1 className="text-2xl font-black uppercase tracking-tighter italic">
+            <h1 className="font-russo text-2xl font-black uppercase tracking-tighter italic">
               {renderFormattedPath(activeTab)}
             </h1>
             <div className="flex items-center gap-2 mt-2">
@@ -70,7 +61,7 @@ export function GearGrid() {
         {/* The Set Grid */}
         <div className="space-y-4 group/section">
           <div className="flex items-center gap-3">
-            <h2 className="text-[11px] font-black uppercase tracking-[0.3em] text-white/40">
+            <h2 className="font-russo text-[11px] uppercase tracking-[0.3em] text-white/40">
               Gear Configuration
             </h2>
             <div className="h-[1px] flex-1 bg-white/10" />
@@ -97,7 +88,7 @@ export function GearGrid() {
 
         {/* Global Variants Section */}
         <div className="mt-8 border-t border-white/10 pt-8 px-4">
-          <h3 className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-4">
+          <h3 className="font-russo text-[10px] text-white/40 uppercase tracking-widest mb-4">
             Manual Variants
           </h3>
           <div className="flex flex-wrap gap-2 mb-4">
