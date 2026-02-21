@@ -7,6 +7,16 @@ import {
     ChevronDown
 } from "lucide-react";
 import { AddSetDialog } from "./AddSetDialog";
+import { cleanSetPath } from "@/lib/utils";
+
+const ICON_MAP: Record<string, { icon: any; color: string }> = {
+    engaged: { icon: Swords, color: 'text-red-400' },
+    weapons: { icon: Box, color: 'text-orange-400' },
+    precast: { icon: Zap, color: 'text-yellow-400' },
+    midcast: { icon: Sparkles, color: 'text-sky-400' },
+    idle: { icon: Shield, color: 'text-blue-400' },
+    utility: { icon: Activity, color: 'text-emerald-400' },
+};
 
 export function Sidebar() {
     const { allSets, activeTab, setActiveTab, searchTerm } = useGearStore();
@@ -30,22 +40,14 @@ export function Sidebar() {
 
     const derivedCategories = useMemo(() => {
         const categories: Record<string, { label: string; icon: any; color: string }> = {};
-        const iconMap: Record<string, { icon: any; color: string }> = {
-            engaged: { icon: Swords, color: 'text-red-400' },
-            weapons: { icon: Box, color: 'text-orange-400' },
-            precast: { icon: Zap, color: 'text-yellow-400' },
-            midcast: { icon: Sparkles, color: 'text-sky-400' },
-            idle: { icon: Shield, color: 'text-blue-400' },
-            utility: { icon: Activity, color: 'text-emerald-400' },
-        };
 
         Object.keys(filteredSets).forEach(path => {
             // Standardize path for root detection
-            const cleanPath = path.startsWith('sets.') ? path.substring(5) : path;
+            const cleanPath = cleanSetPath(path);
             const root = cleanPath.split(/[.\[]/)[0];
 
             if (!categories[root] && root !== "") {
-                const config = iconMap[root] || { icon: Folder, color: 'text-zinc-500' };
+                const config = ICON_MAP[root] || { icon: Folder, color: 'text-zinc-500' };
                 categories[root] = { label: root.toUpperCase(), ...config };
             }
         });
@@ -63,18 +65,18 @@ export function Sidebar() {
     return (
         <aside className="w-[340px] h-full border-r border-white/10 flex flex-col shrink-0 overflow-hidden
             bg-ui-window 
-            [[data-theme='ffxi']_&]:bg-[linear-gradient(180deg,#000080_0%,#000033_100%)]">
+            ffxi:bg-[linear-gradient(180deg,#000080_0%,#000033_100%)]">
 
             <div className="sticky top-0 z-20 px-5 pt-5 pb-4 border-b border-black/60 shadow-lg 
                 bg-ui-window 
-                [[data-theme='ffxi']_&]:bg-transparent [[data-theme='ffxi']_&]:shadow-none">
+                ffxi:bg-transparent ffxi:shadow-none">
                 <AddSetDialog />
             </div>
 
             <div className="flex-1 overflow-y-auto p-5 pt-2 space-y-4 custom-scrollbar">
                 {sortedCategories.map(([catId, config]) => {
                     const setsInCategory = Object.keys(filteredSets).filter(path => {
-                        const clean = path.startsWith('sets.') ? path.substring(5) : path;
+                        const clean = cleanSetPath(path);
                         return clean === catId || clean.startsWith(`${catId}.`) || clean.startsWith(`${catId}[`);
                     });
 
@@ -89,7 +91,7 @@ export function Sidebar() {
                             >
                                 <div className="flex items-center gap-3">
                                     <config.icon className={`w-5 h-5 ${config.color}`} />
-                                    <span className="text-[12px] font-black uppercase tracking-[0.2em] text-white">
+                                    <span className="font-russo text-[12px] uppercase tracking-[0.2em] text-white">
                                         {config.label}
                                     </span>
                                     <span className="text-[10px] text-white/40 font-mono">
@@ -122,7 +124,7 @@ export function Sidebar() {
                                             const isVariantActive = activeTab.startsWith(`${path}.`);
                                             const isActive = isBaseActive || isVariantActive;
 
-                                            const displayName = path.startsWith('sets.') ? path.substring(5) : path;
+                                            const displayName = cleanSetPath(path);
 
                                             return (
                                                 <Button

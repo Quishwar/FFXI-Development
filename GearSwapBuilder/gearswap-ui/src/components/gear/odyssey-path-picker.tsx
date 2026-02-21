@@ -33,7 +33,7 @@ export function OdysseyPathPicker({
   return (
     <div className="grid gap-3 pt-4 border-t border-white/10 mt-4">
       <div className="flex flex-col gap-1">
-        <Label className="text-[10px] uppercase tracking-widest text-white/40 font-black">
+        <Label className="text-[10px] uppercase tracking-widest text-white/40 light:text-slate-500 font-black">
           Odyssey Reinforcement Path
         </Label>
       </div>

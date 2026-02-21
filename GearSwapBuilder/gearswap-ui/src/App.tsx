@@ -4,39 +4,15 @@ import { GearGrid } from "./components/GearGrid";
 import { LuaPreview } from "./components/LuaPreview";
 import { Sidebar } from "./components/Sidebar";
 import { useGearStore } from "./store/useGearStore";
+import { useUIStore } from "./store/useUIStore";
+import { useItemDatabase } from "./lib/hooks/useItemDatabase";
 import { AugmentModal } from "./components/gear/augment-modal";
 
 export default function App() {
-  const theme = useGearStore((state) => state.theme);
-  const {
-    initializeItems,
-    setIsLoadingItems,
-    isAugmentModalOpen,
-    closeAugmentModal,
-    modalTarget,
-    updateSlot,
-    allSets
-  } = useGearStore();
+  const { theme, isAugmentModalOpen, closeAugmentModal, modalTarget } = useUIStore();
+  const { updateSlot, allSets } = useGearStore();
 
-  useEffect(() => {
-    async function loadItems() {
-      setIsLoadingItems(true);
-      try {
-        // Items are in public/data or we move them to a place where they can be fetched
-        // Since it was imported from @/data/items.json, Vite would have bundled it.
-        // For standard Vite setup, we can move items.json to public/ and fetch it.
-        // Or we can use dynamic import if it's still in src/data.
-
-        // Let's try dynamic import first as it's cleaner with current structure
-        const ITEM_DATA = await import("@/data/items.json");
-        initializeItems(ITEM_DATA.default);
-      } catch (error) {
-        console.error("Failed to load items:", error);
-        setIsLoadingItems(false);
-      }
-    }
-    loadItems();
-  }, [initializeItems, setIsLoadingItems]);
+  useItemDatabase();
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);

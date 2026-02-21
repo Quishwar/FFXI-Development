@@ -6,22 +6,39 @@
   --color-ui-window: var(--window-bg);
   --color-lua-orange: #f97316;
   --color-lua-green: #22c55e;
-  --variant-dark: [data-theme="dark"] &;
+  --font-russo: "Russo One", sans-serif;
+  --font-chakra: "Chakra Petch", sans-serif;
 }
 
+@variant dark (&:where([data-theme="dark"] *));
+@variant light (&:where([data-theme="light"] *));
+@variant ffxi (&:where([data-theme="ffxi"] *));
+
+body {
+  font-family: var(--font-chakra);
+}
+
+/* Component-level focus states are preferred over global *:focus-visible */
+
 /* --- 1. DARK THEME (Default) --- */
-:root, [data-theme='dark'] {
-  --brand-color: #3b82f6;      
-  --operator-color: #a1a1aa;   
-  --window-bg: #18181b;
-  --background: #09090b;
-  --foreground: #fafafa;
+:root,
+[data-theme='dark'] {
+  --brand-color: #22c55e;
+  /* CTA/Accent */
+  --operator-color: #94a3b8;
+  /* Slate 400 */
+  --window-bg: #1E293B;
+  /* Primary */
+  --background: #0F172A;
+  /* Background */
+  --foreground: #F8FAFC;
+  /* Text */
   --active-text: #ffffff;
 }
 
 :root {
-  --brand: #eab308;
-  --brand-rgb: 234, 179, 8;
+  --brand: #22c55e;
+  --brand-rgb: 34, 197, 94;
 }
 
 [data-theme='dark'] {
@@ -33,7 +50,30 @@
   color: #ffffff !important;
 }
 
-/* --- 2. FFXI THEME --- */
+/* --- 2. LIGHT THEME --- */
+[data-theme='light'] {
+  --brand-color: #16a34a;
+  --operator-color: #475569;
+  --window-bg: #F8FAFC;
+  --background: #E2E8F0;
+  --foreground: #0F172A;
+  --active-text: #ffffff;
+
+  --color-white: #0F172A;
+  --color-black: #ffffff;
+}
+
+[data-theme='light'] {
+  background-color: var(--background) !important;
+  color: var(--foreground) !important;
+}
+
+[data-theme='light'] [cmdk-item],
+[data-theme='light'] [cmdk-input] {
+  color: #0F172A !important;
+}
+
+/* --- 3. FFXI THEME --- */
 [data-theme='ffxi'] {
   --brand-color: #ffcc00;
   --operator-color: #ffffff;
@@ -82,7 +122,7 @@
 [data-theme='dark'] .ff-window:not([data-critical="true"]):hover {
   border-color: rgba(59, 130, 246, 0.5) !important;
   box-shadow: 0 0 12px rgba(59, 130, 246, 0.1);
-  background-color: #27272a !important; 
+  background-color: #27272a !important;
 }
 
 /* Target specific text for Blue Hover in Dark Mode (Non-Critical only) */
@@ -107,7 +147,7 @@
 /* --- 5. EQUIPPED INNER GLOW --- */
 [data-theme='ffxi'] .ff-window.border-brand {
   box-shadow: inset 1px 1px 0px #fff, inset -1px -1px 0px #000, inset 0 0 20px rgba(234, 179, 8, 0.45) !important;
-  background-color: #0000aa !important; 
+  background-color: #0000aa !important;
   filter: brightness(1.1);
   transform: translateY(-1px) translateZ(0);
 }
@@ -138,15 +178,26 @@
 }
 
 @keyframes ff-finger-wiggle {
-  from { transform: translateY(-50%) translate3d(0, 0, 10px); }
-  to { transform: translateY(-50%) translate3d(-4px, 0, 10px); }
+  from {
+    transform: translateY(-50%) translate3d(0, 0, 10px);
+  }
+
+  to {
+    transform: translateY(-50%) translate3d(-4px, 0, 10px);
+  }
 }
 
-[data-theme='ffxi'] .ff-interactive:hover { transform: translate3d(6px, 0, 0); }
-[data-theme='dark'] .ff-interactive:hover { filter: brightness(1.2); }
+[data-theme='ffxi'] .ff-interactive:hover {
+  transform: translate3d(6px, 0, 0);
+}
+
+[data-theme='dark'] .ff-interactive:hover {
+  filter: brightness(1.2);
+}
 
 /* --- 7. TABS & DIALOGS --- */
-[data-state='active'], [aria-selected="true"] {
+[data-state='active'],
+[aria-selected="true"] {
   background-color: var(--brand-color) !important;
   color: var(--active-text) !important;
   text-shadow: none !important;
@@ -169,7 +220,7 @@
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  border-radius: 0px; 
+  border-radius: 0px;
 }
 
 /* --- DARK THEME: BLUE THUMB / NEUTRAL TRACK --- */
@@ -178,11 +229,13 @@
 }
 
 [data-theme='dark'] .custom-scrollbar::-webkit-scrollbar-track {
-  background: rgba(0, 0, 0, 0.3); /* Subtle dark neutral track */
+  background: rgba(0, 0, 0, 0.3);
+  /* Subtle dark neutral track */
 }
 
 [data-theme='dark'] .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #1e40af; /* Deep Blue Thumb */
+  background-color: #1e40af;
+  /* Deep Blue Thumb */
   border: 1px solid rgba(59, 130, 246, 0.3);
 }
 
@@ -196,12 +249,14 @@
 }
 
 [data-theme='ffxi'] .custom-scrollbar::-webkit-scrollbar-track {
-  background: #000033; /* Classic Blue Track */
+  background: #000033;
+  /* Classic Blue Track */
   border-left: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 [data-theme='ffxi'] .custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: #e2b007; /* FFXI Gold Thumb */
+  background-color: #e2b007;
+  /* FFXI Gold Thumb */
   border: 1px solid #ffcc00;
   box-shadow: inset 1px 1px 0px rgba(255, 255, 255, 0.3);
 }
@@ -220,7 +275,7 @@
   outline: none;
 }
 
-[data-radix-portal] > div:first-child {
+[data-radix-portal]>div:first-child {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
@@ -229,18 +284,23 @@
 
 [data-theme='ffxi'] [role='dialog'] {
   border: 1px solid #000 !important;
-  box-shadow: inset 1px 1px 0px #fff, inset -1px -1px 0px #000, 8px 8px 0px rgba(0,0,0,0.5) !important;
+  box-shadow: inset 1px 1px 0px #fff, inset -1px -1px 0px #000, 8px 8px 0px rgba(0, 0, 0, 0.5) !important;
   border-radius: 0px !important;
 }
 
-[role='dialog'][data-critical="true"] { border-color: #ef4444 !important; }
+[role='dialog'][data-critical="true"] {
+  border-color: #ef4444 !important;
+}
+
 [data-theme='ffxi'] [role='dialog'][data-critical="true"] {
   --window-bg: #440000;
   background: var(--window-bg) !important;
 }
 
 /* --- 8. BUTTONS & INPUTS --- */
-.dialog-submit-btn { @apply transition-all duration-200; }
+.dialog-submit-btn {
+  @apply transition-all duration-200;
+}
 
 [data-critical="true"] .dialog-submit-btn {
   background-color: #ef4444 !important;
@@ -254,13 +314,14 @@
 }
 
 /* --- 9. COMMAND & SEARCH --- */
-[cmdk-input-wrapper] svg, .lucide-search {
+[cmdk-input-wrapper] svg {
   color: #ffffff !important;
   stroke: #ffffff !important;
   opacity: 0.6 !important;
 }
 
-[data-theme='ffxi'] [cmdk-input], [data-theme='ffxi'] [cmdk-item] {
+[data-theme='ffxi'] [cmdk-input],
+[data-theme='ffxi'] [cmdk-item] {
   color: #ffffff !important;
 }
 
@@ -269,9 +330,15 @@
   color: #000000 !important;
 }
 
-[data-theme='ffxi'] [cmdk-root] { background-color: var(--window-bg) !important; }
+[data-theme='ffxi'] [cmdk-root] {
+  background-color: var(--window-bg) !important;
+}
 
-button, .cursor-pointer, .ff-interactive { cursor: pointer !important; }
+button,
+.cursor-pointer,
+.ff-interactive {
+  cursor: pointer !important;
+}
 
 /* --- 10. TOOLTIPS --- */
 /* --- 10. TOOLTIP ENHANCEMENTS --- */
@@ -306,11 +373,13 @@ button, .cursor-pointer, .ff-interactive { cursor: pointer !important; }
 .tooltip-aug {
   font-size: 13px !important;
   line-height: 1.4;
-  color: #22c55e; /* Lua Green */
+  color: #22c55e;
+  /* Lua Green */
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 [data-theme='ffxi'] .tooltip-aug {
-  color: #00ff00 !important; /* Brighter green for the blue background */
+  color: #FFD700 !important;
+  /* Gold for FFXI theme */
   text-shadow: 1px 1px 0px #000;
 }
