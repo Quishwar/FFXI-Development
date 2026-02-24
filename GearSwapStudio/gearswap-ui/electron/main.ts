@@ -30,6 +30,20 @@ function createWindow() {
     win.loadFile(path.join(__dirname, '../dist/index.html'))
   }
 
+  // Disable auto-download so we can control it via UI
+  autoUpdater.autoDownload = false;
+
+  // Pipe updater logs to the renderer console for debugging
+  const logToClient = (level: string, msg: string) => {
+    win?.webContents.send('updater-event', { type: 'log', message: `[${level}] ${msg}` });
+  };
+  autoUpdater.logger = {
+    info(msg: string) { logToClient('INFO', msg); },
+    warn(msg: string) { logToClient('WARN', msg); },
+    error(msg: string) { logToClient('ERROR', msg); },
+    debug(msg: string) { logToClient('DEBUG', msg); }
+  } as any;
+
   // Check for updates once the window is created
   if (!process.env.VITE_DEV_SERVER_URL) {
     autoUpdater.checkForUpdatesAndNotify()
@@ -53,7 +67,11 @@ function createWindow() {
   });
 }
 
-// IPC listener for triggering install
+// IPC listener for triggering download and install
+ipcMain.on('download-update', () => {
+  autoUpdater.downloadUpdate();
+});
+
 ipcMain.on('install-update', () => {
   autoUpdater.quitAndInstall();
 });

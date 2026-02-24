@@ -10,6 +10,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     // Deliberately strip event as it includes `sender` 
     ipcRenderer.on('updater-event', (event, data) => callback(event, data));
   },
+  downloadUpdate: () => {
+    ipcRenderer.send('download-update');
+  },
   installUpdate: () => {
     ipcRenderer.send('install-update');
   }

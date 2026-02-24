@@ -11,7 +11,9 @@ export function UpdateProgress() {
         if (!window.electronAPI) return;
 
         window.electronAPI.onUpdaterEvent((_event: any, data: UpdaterEvent) => {
-            if (data.type === 'update-available') {
+            if (data.type === 'log') {
+                console.log('[AutoUpdater]', data.message);
+            } else if (data.type === 'update-available') {
                 setStatus('checking');
                 setVersion(data.info?.version || null);
             } else if (data.type === 'download-progress') {
@@ -48,6 +50,17 @@ export function UpdateProgress() {
             {status === 'error' ? (
                 <div className="text-red-400 text-xs no-hand">
                     {errorMsg}
+                </div>
+            ) : status === 'checking' ? (
+                <div>
+                    <button
+                        onClick={() => window.electronAPI.downloadUpdate()}
+                        className="mt-2 w-full py-2 px-3 bg-[rgba(30,100,60,0.6)] hover:bg-[rgba(50,140,90,0.8)] 
+                      border border-[rgba(100,255,150,0.4)] rounded text-sm text-green-50 
+                      transition-all duration-200 active:scale-95 shadow-[inset_0_1px_0_rgba(255,255,255,0.2)]"
+                    >
+                        Download Update
+                    </button>
                 </div>
             ) : (
                 <div className="no-hand">

@@ -1,5 +1,6 @@
 export interface UpdaterEvent {
-    type: 'update-available' | 'download-progress' | 'update-downloaded' | 'error';
+    type: 'update-available' | 'download-progress' | 'update-downloaded' | 'error' | 'log';
+    message?: string;
     info?: any;
     progress?: {
         percent: number;
@@ -17,6 +18,7 @@ declare global {
             chrome: () => string;
             electron: () => string;
             onUpdaterEvent: (callback: (event: any, data: UpdaterEvent) => void) => void;
+            downloadUpdate: () => void;
             installUpdate: () => void;
         };
     }
