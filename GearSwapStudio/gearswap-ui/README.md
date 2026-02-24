@@ -5,6 +5,9 @@ GearSwap Studio is a modern, standalone desktop application designed to simplify
 
 ## Features Overview
 
+### Import Existing Lua Files
+Got an existing GearSwap `.lua` file? No need to start from scratch! GearSwap Studio can import your current files, automatically parsing your sets, character name, and job. This allows you to visually edit your gear and export it back without losing your custom logic or variables.
+
 ### Visual Gear Slot Configurations
 Interact with a full grid representing your character's equipment slots to easily equip the right gear for the right situation. 
 
