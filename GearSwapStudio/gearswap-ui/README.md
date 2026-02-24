@@ -35,23 +35,19 @@ Comfortably use the app in varied lighting conditions with built-in Light and Da
 ## User Guide
 For a comprehensive walkthrough on how to use the GearSwap Studio, please refer to the [User Manual](./user_manual.md).
 
+## Installation & Updates
+
+1. Download the latest `GearSwapStudio-Setup-vX.X.X.exe` from the [GitHub Releases](https://github.com/GCarman1982/FFXI-Development/releases) page.
+2. Run the installer to add GearSwap Studio to your system.
+3. **Auto-Updates**: Once installed, GearSwap Studio will automatically download and install future updates in the background!
+
 ## Development
 
-### Setup
-1. Install dependencies:
-   ```bash
-   npm install
-   ```
+If you wish to build the application from source:
 
-2. Run the development environment:
-   ```bash
-   npm run dev
-   ```
-
-3. Build the portable executable:
-   ```bash
-   npm run build
-   ```
+1. Install dependencies: `npm install`
+2. Run the development environment: `npm run dev`
+3. Build the executable installer: `npm run build`
 
 ---
 *Created by Quishwar*

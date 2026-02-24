@@ -2,6 +2,11 @@
 
 Welcome to **GearSwap Studio**, a modern, visual suite for building and managing your Final Fantasy XI gear sets. Whether you're a veteran player or new to GearSwap, this tool is designed to make your gear management as seamless as possible.
 
+## Installation & Updates
+Download the latest `GearSwapStudio-Setup-vX.X.X.exe` from the [GitHub Releases](https://github.com/GCarman1982/FFXI-Development/releases) page. Run the installer to add the application to your Desktop and Start Menu. 
+
+The Studio includes an **Auto-Updater**! Whenever a new feature or fix is released, the app will automatically download it in the background and update itself the next time you launch it.
+
 ---
 
 ## 1. Getting Started: The Interface
@@ -133,7 +138,7 @@ If you imported an existing file, the Studio is smart enough to **merge** your c
 
 If you want to start completely fresh, click the **Reset** button in the top menu. 
 > [!CAUTION]
-> This will purge all stored sets and character info from your browser's local storage. Make sure you've exported your work first!
+> This will purge all stored sets and character info from the application's local data folder. Make sure you've exported your work first!
 
 ---
 

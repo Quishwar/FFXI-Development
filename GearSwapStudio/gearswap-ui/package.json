@@ -75,7 +75,7 @@
     "win": {
       "target": "nsis",
       "artifactName": "GearSwapStudio-Setup-${version}.exe",
-      "icon": "public/ffxi_icon.ico"
+      "icon": "public/moogle.ico"
     },
     "nsis": {
       "oneClick": false,
