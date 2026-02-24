@@ -72,4 +72,4 @@ lint_*
 *_lint.json
 lint.debug.txt
 App_lint.txt
-gitlog.txt
+gitlog*
