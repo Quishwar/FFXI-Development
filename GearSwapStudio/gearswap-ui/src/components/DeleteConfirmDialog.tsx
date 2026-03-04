@@ -28,7 +28,7 @@ export function DeleteConfirmDialog({
         <Dialog.Overlay className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[200]" />
 
         <Dialog.Content
-          className="fixed inset-0 m-auto h-fit z-[201] w-full max-w-[350px] outline-none"
+          className="fixed left-[50%] top-[50%] z-[201] translate-x-[-50%] translate-y-[-50%] w-[90vw] max-w-[350px] outline-none"
         >
           <div className="ff-window p-6 space-y-4 shadow-2xl relative" data-critical={isPurge}>
             {/* Header Section */}
