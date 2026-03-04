@@ -126,15 +126,17 @@ export function TopNav() {
         {/* Right Side: Actions */}
         <div className="flex items-center gap-3 shrink-0">
           <ThemeToggle />
-          <Button
-            variant="ghost"
-            className="ff-interactive text-[10px] uppercase font-bold tracking-widest text-zinc-400 hover:text-white"
-            onClick={() => window.electronAPI.checkForUpdates()}
-            title="Check for Updates"
-          >
-            <RefreshCw className="w-4 h-4 mr-2" />
-            Update
-          </Button>
+          {window?.electronAPI && (
+            <Button
+              variant="ghost"
+              className="ff-interactive text-[10px] uppercase font-bold tracking-widest text-zinc-400 hover:text-white"
+              onClick={() => window.electronAPI.checkForUpdates()}
+              title="Check for Updates"
+            >
+              <RefreshCw className="w-4 h-4 mr-2" />
+              Update
+            </Button>
+          )}
           <Button
             variant="ghost"
             className="ff-interactive text-[10px] uppercase font-bold tracking-widest text-zinc-400 hover:text-white"

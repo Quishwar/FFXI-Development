@@ -1,7 +1,7 @@
 {
   "name": "gearswap-studio",
   "private": true,
-  "version": "1.4.3",
+  "version": "1.4.4",
   "description": "A modern desktop application for visually creating, managing, and exporting FFXI GearSwap Lua files.",
   "repository": {
     "type": "git",
@@ -16,6 +16,7 @@
     "type-check": "tsc",
     "build": "npm run type-check && npm run build:vite && electron-builder",
     "build:vite": "vite build",
+    "build:web": "vite build --config vite.config.web.ts",
     "lint": "eslint .",
     "preview": "vite preview"
   },
