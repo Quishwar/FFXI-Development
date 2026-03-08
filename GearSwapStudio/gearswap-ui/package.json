@@ -78,6 +78,13 @@
       "artifactName": "GearSwapStudio-Setup-${version}.exe",
       "icon": "public/moogle.ico"
     },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Utility",
+      "icon": "public/moogle.ico"
+    },
     "nsis": {
       "oneClick": false,
       "allowToChangeInstallationDirectory": true,
